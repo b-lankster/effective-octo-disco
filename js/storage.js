@@ -2,13 +2,16 @@
 
 // ─── Persistence via localStorage ────────────────────────────────────────────
 //
-// Schema:
-//   mhnow_progress  → { [equipId]: { currentGrade, targetGrade, tracked } }
-//   mhnow_inventory → { [materialId]: qty }  (materials user already has)
+// Schema v2:
+//   mhnow_v2_progress  → { [equipId]: { currentGrade, targetGrade, tracked } }
+//   mhnow_v2_inventory → { [materialId]: qty }
+//
+// Grade values are step counts from 0 (not crafted) up to (11 - monster.stars) * 5.
+// Step 1 = Grade(stars)-Level1, step 5 = Grade(stars)-Level5, step 6 = Grade(stars+1)-Level1, etc.
 
 const KEYS = {
-  progress:  'mhnow_progress',
-  inventory: 'mhnow_inventory',
+  progress:  'mhnow_v2_progress',
+  inventory: 'mhnow_v2_inventory',
 };
 
 function loadProgress() {
@@ -34,13 +37,11 @@ function saveInventory(inventory) {
 // ─── App state (single source of truth) ──────────────────────────────────────
 
 const AppState = {
-  progress:  loadProgress(),   // { [id]: { currentGrade, targetGrade, tracked } }
-  inventory: loadInventory(),  // { [materialId]: qty }
-
-  // ── progress helpers ──────────────────────────────────────────────────────
+  progress:  loadProgress(),
+  inventory: loadInventory(),
 
   getProgress(id) {
-    return this.progress[id] || { currentGrade: 0, targetGrade: 10, tracked: false };
+    return this.progress[id] || { currentGrade: 0, targetGrade: 5, tracked: false };
   },
 
   setTracked(id, tracked) {
@@ -63,8 +64,6 @@ const AppState = {
     saveProgress(this.progress);
   },
 
-  // ── inventory helpers ─────────────────────────────────────────────────────
-
   getInventory(materialId) {
     return this.inventory[materialId] || 0;
   },
@@ -73,8 +72,6 @@ const AppState = {
     this.inventory[materialId] = Math.max(0, qty);
     saveInventory(this.inventory);
   },
-
-  // ── derived ───────────────────────────────────────────────────────────────
 
   trackedIds() {
     return Object.entries(this.progress)

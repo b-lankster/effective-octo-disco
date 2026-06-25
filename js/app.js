@@ -94,7 +94,8 @@ function handleAction(action, id, mat) {
   }
   if (action === 'current-inc') {
     const p = AppState.getProgress(id);
-    AppState.setCurrentGrade(id, Math.min(10, p.currentGrade + 1));
+    const mx = maxStep(getMonsterForEquip(id)) ?? 50;
+    AppState.setCurrentGrade(id, Math.min(mx, p.currentGrade + 1));
     renderTab();
   }
   if (action === 'current-dec') {
@@ -104,7 +105,8 @@ function handleAction(action, id, mat) {
   }
   if (action === 'target-inc') {
     const p = AppState.getProgress(id);
-    AppState.setTargetGrade(id, Math.min(10, p.targetGrade + 1));
+    const mx = maxStep(getMonsterForEquip(id)) ?? 50;
+    AppState.setTargetGrade(id, Math.min(mx, p.targetGrade + 1));
     renderTab();
   }
   if (action === 'target-dec') {
@@ -142,7 +144,7 @@ function renderTab() {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function starStr(n)  { return '★'.repeat(n) + '☆'.repeat(5 - n); }
+function starStr(n)  { return '★'.repeat(n) + '☆'.repeat(Math.max(0, 6 - n)); }
 function rarityBadge(r) {
   const colors = ['','#9e9e9e','#66bb6a','#42a5f5','#ab47bc','#ff7043','#ffca28','#e53935','#f50057'];
   return `<span class="rarity-badge" style="background:${colors[r] || '#9e9e9e'}">R${r}</span>`;
@@ -152,15 +154,22 @@ function elemBadge(element) {
   if (!m || element === 'none') return '';
   return `<span class="elem-badge" style="background:${m.color}">${m.name}</span>`;
 }
-function gradeBar(current, target, max = 10) {
-  const pct = (current / max) * 100;
-  const tpct = (target / max) * 100;
+function gradeBar(current, target, monster) {
+  const mx  = maxStep(monster);
+  const pct  = (current / mx) * 100;
+  const tpct = (target  / mx) * 100;
+  const cur  = stepLabel(monster, current);
+  const tgt  = stepLabel(monster, target);
   return `
-    <div class="grade-bar-wrap" title="G${current} → G${target}">
-      <div class="grade-bar-fill" style="width:${pct}%"></div>
+    <div class="grade-bar-wrap" title="${cur} → ${tgt}">
+      <div class="grade-bar-fill"   style="width:${pct}%"></div>
       <div class="grade-bar-target" style="width:${tpct}%"></div>
-      <span class="grade-bar-label">G${current}→G${target}</span>
+      <span class="grade-bar-label">${cur}→${tgt}</span>
     </div>`;
+}
+function getMonsterForEquip(equipId) {
+  const equip = WEAPON_BY_ID[equipId] ?? ARMOR_BY_ID[equipId];
+  return equip ? MONSTER_BY_ID[equip.monsterId] : null;
 }
 
 // ─── GEAR TAB ─────────────────────────────────────────────────────────────────
@@ -284,7 +293,7 @@ function renderGearItem(item, monster) {
           <div class="gear-badges">${kindLabel}</div>
         </div>
         <div class="gear-controls">
-          ${tracked && !done ? gradeBar(prog.currentGrade, prog.targetGrade) : ''}
+          ${tracked && !done ? gradeBar(prog.currentGrade, prog.targetGrade, monster) : ''}
           <button class="track-btn${tracked ? ' tracked' : ''}" data-action="toggle" data-id="${item.id}">
             ${tracked ? (done ? '✓ Done' : '● Tracking') : '+ Track'}
           </button>
@@ -295,13 +304,13 @@ function renderGearItem(item, monster) {
           <div class="grade-row">
             <label>Current</label>
             <button class="grade-btn" data-action="current-dec" data-id="${item.id}">−</button>
-            <span class="grade-val">G${prog.currentGrade}</span>
+            <span class="grade-val">${stepLabel(monster, prog.currentGrade)}</span>
             <button class="grade-btn" data-action="current-inc" data-id="${item.id}">+</button>
           </div>
           <div class="grade-row">
             <label>Target</label>
             <button class="grade-btn" data-action="target-dec" data-id="${item.id}">−</button>
-            <span class="grade-val">G${prog.targetGrade}</span>
+            <span class="grade-val">${stepLabel(monster, prog.targetGrade)}</span>
             <button class="grade-btn" data-action="target-inc" data-id="${item.id}">+</button>
           </div>
         </div>
@@ -342,8 +351,7 @@ function renderMaterialsTab(el) {
       <h2>Materials Needed</h2>
       <span class="tracked-pill">${totalShortage} items short</span>
     </div>
-    <p class="disclaimer">⚠ Quantities are approximate — verify exact costs at
-      <a href="https://mhnow.me/material?lang=en" target="_blank">mhnow.me</a></p>
+    <p class="disclaimer">Material costs from <a href="https://mhnow.me/material?lang=en" target="_blank">mhnow.me</a></p>
     <div id="mat-list">
       ${monsterOrder.map(mid => renderMonsterMaterials(byMonster[mid])).join('')}
     </div>
@@ -425,7 +433,7 @@ function renderPriorityTab(el) {
   `;
 }
 
-function renderPriorityCard({ monster, score, pieces, gradesTotal }, rank, maxScore) {
+function renderPriorityCard({ monster, score, pieces, stepsTotal }, rank, maxScore) {
   const pct = Math.round((score / maxScore) * 100);
   const urgencyClass = pct >= 75 ? 'urgency-high' : pct >= 40 ? 'urgency-mid' : 'urgency-low';
 
@@ -443,11 +451,13 @@ function renderPriorityCard({ monster, score, pieces, gradesTotal }, rank, maxSc
     const type = e.type
       ? `<span class="type-badge">${WEAPON_TYPES[e.type].short}</span>`
       : `<span class="type-badge armor-badge">${ARMOR_SLOT_NAMES[e.slot]}</span>`;
+    const cur = stepLabel(monster, p.currentGrade);
+    const tgt = stepLabel(monster, p.targetGrade);
     return `
       <div class="priority-gear-row">
         ${type}
         <span class="gear-name">${e.name}</span>
-        <span class="grade-label">G${p.currentGrade}→G${p.targetGrade}</span>
+        <span class="grade-label">${cur}→${tgt}</span>
       </div>`;
   }).join('');
 
@@ -463,7 +473,7 @@ function renderPriorityCard({ monster, score, pieces, gradesTotal }, rank, maxSc
         </div>
         <div class="priority-stats">
           <span>${pieces} piece${pieces !== 1 ? 's' : ''}</span>
-          <span>${gradesTotal} grades</span>
+          <span>${stepsTotal} steps</span>
         </div>
       </div>
       <div class="priority-bar-wrap">
