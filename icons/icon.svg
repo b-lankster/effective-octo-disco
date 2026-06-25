@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#0f1117"/>
+  <rect width="512" height="512" rx="80" fill="#1a1d27"/>
+  <!-- Crossed swords icon -->
+  <g transform="translate(256,256)">
+    <!-- Sword 1 -->
+    <g transform="rotate(-45)">
+      <rect x="-8" y="-160" width="16" height="200" rx="4" fill="#e8a020"/>
+      <rect x="-18" y="36" width="36" height="14" rx="3" fill="#8899aa"/>
+      <rect x="-10" y="50" width="20" height="40" rx="4" fill="#5a6070"/>
+    </g>
+    <!-- Sword 2 -->
+    <g transform="rotate(45)">
+      <rect x="-8" y="-160" width="16" height="200" rx="4" fill="#e8a020"/>
+      <rect x="-18" y="36" width="36" height="14" rx="3" fill="#8899aa"/>
+      <rect x="-10" y="50" width="20" height="40" rx="4" fill="#5a6070"/>
+    </g>
+    <!-- Center gem -->
+    <circle r="18" fill="#d94040"/>
+    <circle r="10" fill="#ff6b6b"/>
+  </g>
+</svg>
