@@ -94,7 +94,8 @@ function handleAction(action, id, mat) {
   }
   if (action === 'current-inc') {
     const p = AppState.getProgress(id);
-    const mx = maxStep(getMonsterForEquip(id)) ?? 50;
+    const m = getMonsterForEquip(id);
+    const mx = m ? maxStep(m) : 50;
     AppState.setCurrentGrade(id, Math.min(mx, p.currentGrade + 1));
     renderTab();
   }
@@ -105,7 +106,8 @@ function handleAction(action, id, mat) {
   }
   if (action === 'target-inc') {
     const p = AppState.getProgress(id);
-    const mx = maxStep(getMonsterForEquip(id)) ?? 50;
+    const m = getMonsterForEquip(id);
+    const mx = m ? maxStep(m) : 50;
     AppState.setTargetGrade(id, Math.min(mx, p.targetGrade + 1));
     renderTab();
   }
