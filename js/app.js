@@ -24,7 +24,7 @@ function bindNav() {
     if (!btn) return;
     UI.activeTab = btn.dataset.tab;
     renderNav();
-    renderTab();
+    renderTab(true);
   });
 }
 
@@ -134,12 +134,13 @@ function renderNav() {
   `).join('');
 }
 
-function renderTab() {
+function renderTab(resetScroll = false) {
   const el = document.getElementById('main');
-  el.scrollTop = 0;
+  const savedScroll = resetScroll ? 0 : el.scrollTop;
   if (UI.activeTab === 'gear')      renderGearTab(el);
   else if (UI.activeTab === 'materials') renderMaterialsTab(el);
   else                              renderPriorityTab(el);
+  el.scrollTop = savedScroll;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
