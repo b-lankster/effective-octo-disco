@@ -5,16 +5,19 @@ const WEAPON_TYPES = {
   gs:  { id: 'gs',  name: 'Great Sword',    short: 'GS'  },
   ls:  { id: 'ls',  name: 'Long Sword',     short: 'LS'  },
   hmr: { id: 'hmr', name: 'Hammer',         short: 'HMR' },
+  hh:  { id: 'hh',  name: 'Hunting Horn',   short: 'HH'  },
   db:  { id: 'db',  name: 'Dual Blades',    short: 'DB'  },
   lnc: { id: 'lnc', name: 'Lance',          short: 'LNC' },
   gl:  { id: 'gl',  name: 'Gunlance',       short: 'GL'  },
+  sa:  { id: 'sa',  name: 'Switch Axe',     short: 'SA'  },
   cb:  { id: 'cb',  name: 'Charge Blade',   short: 'CB'  },
+  ig:  { id: 'ig',  name: 'Insect Glaive',  short: 'IG'  },
   lbg: { id: 'lbg', name: 'Light Bowgun',   short: 'LBG' },
   bow: { id: 'bow', name: 'Bow',            short: 'Bow' },
   hbg: { id: 'hbg', name: 'Heavy Bowgun',   short: 'HBG' },
 };
 
-const WEAPON_TYPE_ORDER = ['sns','gs','ls','hmr','db','lnc','gl','cb','lbg','bow','hbg'];
+const WEAPON_TYPE_ORDER = ['sns','gs','ls','hmr','hh','db','lnc','gl','sa','cb','ig','lbg','bow','hbg'];
 
 const ARMOR_SLOTS = ['head','chest','arms','waist','legs'];
 const ARMOR_SLOT_NAMES = {
@@ -35,19 +38,79 @@ const ELEMENT_META = {
   none:    { name: '—',  color: '#78909c' },
 };
 
-// Weapon types available per starting grade (grade = monster's star rating)
-const WEAPONS_BY_TIER = {
-  1: ['sns','gs','cb','gl','lbg','hbg'],
-  2: ['sns','gs','ls','cb','gl','lbg','hbg'],
-  3: ['sns','gs','ls','hmr','cb','gl','lbg','hbg'],
-  4: ['sns','gs','ls','hmr','lnc','cb','gl','lbg','bow'],
-  5: ['sns','gs','ls','hmr','db','lnc','gl','cb','lbg','bow','hbg'],
-  6: ['sns','gs','ls','hmr','db','lnc','gl','cb','lbg','bow','hbg'],
+const MONSTER_WEAPONS = {
+  'aknosom': ['gs', 'ls', 'db', 'lnc', 'gl', 'sa', 'ig'],
+  'almudron': ['ls', 'hmr', 'db', 'gl', 'sa', 'lbg', 'bow'],
+  'anjanath': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'gl', 'sa', 'ig', 'lbg', 'bow', 'hbg'],
+  'arzuros': ['ls', 'hmr', 'hh', 'db', 'sa', 'bow', 'hbg'],
+  'astalos': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'azure_rathalos': ['sns', 'gs', 'ls', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow'],
+  'banbaro': ['gs', 'ls', 'hmr', 'db', 'gl', 'sa', 'lbg', 'bow'],
+  'barioth': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'barroth': ['sns', 'gs', 'hmr', 'hh', 'lnc', 'gl', 'sa', 'lbg'],
+  'basarios': ['ls', 'hmr', 'hh', 'lnc', 'cb', 'lbg', 'hbg'],
+  'bazelgeuse': ['ls', 'hh', 'db', 'lnc', 'gl', 'sa', 'lbg'],
+  'beotodus': ['gs', 'db', 'cb', 'ig', 'lbg'],
+  'bishaten': ['sns', 'hmr', 'sa', 'lbg', 'bow', 'hbg'],
+  'black_diablos': ['hmr', 'db', 'sa', 'cb', 'ig', 'bow', 'hbg'],
+  'brute_tigrex': ['sns', 'gs', 'ls', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'chameleos': ['gs', 'ls', 'hmr', 'hh', 'db', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'chatacabra': ['sns', 'hmr', 'cb', 'ig', 'hbg'],
+  'coral_pukei_pukei': ['sns', 'gs', 'hmr', 'hh', 'lnc', 'sa', 'ig', 'lbg', 'bow', 'hbg'],
+  'deviljho': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'diablos': ['sns', 'gs', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'bow', 'hbg'],
+  'ebony_odogaron': ['db', 'lnc', 'cb', 'ig', 'lbg'],
+  'espinas': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'fulgur_anjanath': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'gl', 'sa', 'ig', 'lbg', 'bow', 'hbg'],
+  'garangolm': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'glavenus': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'gold_rathian': ['sns', 'ls', 'hh', 'gl', 'sa', 'cb', 'lbg', 'bow', 'hbg'],
+  'gossharag': ['sns', 'gs', 'hmr', 'lnc', 'cb', 'ig', 'lbg'],
+  'great_girros': ['sns', 'gs', 'hmr', 'gl', 'cb'],
+  'great_jagras': ['sns', 'gs', 'gl', 'sa', 'cb', 'lbg', 'hbg'],
+  'great_wroggi': ['sns', 'ls', 'hmr', 'db', 'bow'],
+  'jyuratodus': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'khezu': ['sns', 'gs', 'hmr', 'hh', 'db', 'gl', 'sa', 'ig', 'lbg', 'bow'],
+  'kirin': ['sns', 'gs', 'hh', 'db', 'lnc', 'sa', 'ig', 'lbg', 'hbg'],
+  'kulu_ya_ku': ['ls', 'hmr', 'hh', 'db', 'lnc', 'ig', 'bow'],
+  'kushala_daora': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'lagombi': ['gs', 'ls', 'db', 'gl', 'sa', 'ig', 'hbg'],
+  'legiana': ['sns', 'gs', 'ls', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'lunagaron': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'magnamalo': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'malzeno': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'mizutsune': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'namielle': ['sns', 'ls', 'hh', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'nargacuga': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'nergigante': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'nightshade_paolumu': ['sns', 'gs', 'hmr', 'hh', 'lnc', 'sa', 'ig', 'lbg', 'bow', 'hbg'],
+  'odogaron': ['db', 'lnc', 'cb', 'ig', 'lbg'],
+  'paolumu': ['sns', 'hh', 'sa', 'lbg'],
+  'pink_rathian': ['sns', 'ls', 'hh', 'gl', 'cb', 'bow'],
+  'pukei_pukei': ['sns', 'gs', 'hmr', 'hh', 'lnc', 'sa', 'ig', 'bow', 'hbg'],
+  'quematrice': ['sns', 'gs', 'ls', 'db', 'lnc', 'gl', 'bow'],
+  'radobaan': ['sns', 'gs', 'hmr', 'hh', 'hbg'],
+  'rajang': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'rathalos': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow'],
+  'rathian': ['sns', 'ls', 'hh', 'gl', 'sa', 'cb', 'ig', 'bow', 'hbg'],
+  'seregios': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'shogun_ceanataur': ['gs', 'ls', 'hmr', 'db', 'lnc', 'cb', 'bow', 'hbg'],
+  'silver_rathalos': ['sns', 'gs', 'ls', 'hmr', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow'],
+  'somnacanth': ['gs', 'ls', 'hmr', 'hh', 'db', 'cb', 'ig'],
+  'stygian_zinogre': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'teostra': ['sns', 'gs', 'ls', 'hmr', 'hh', 'lnc', 'sa', 'cb', 'lbg', 'bow', 'hbg'],
+  'tigrex': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'tobi_kadachi': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
+  'tzitzi_ya_ku': ['ls', 'db', 'ig', 'hbg'],
+  'vipertobikadachi': ['ls', 'db', 'gl', 'cb', 'ig', 'bow', 'hbg'],
+  'volvidon': ['hmr', 'lnc', 'gl', 'sa', 'cb', 'hbg'],
+  'zinogre': ['sns', 'gs', 'ls', 'hmr', 'hh', 'db', 'lnc', 'gl', 'sa', 'cb', 'ig', 'lbg', 'bow', 'hbg'],
 };
 
 const WEAPON_DESCRIPTORS = {
-  sns: 'Edge', gs: 'Blade', ls: 'Sword', hmr: 'Hammer', db: 'Fangs',
-  lnc: 'Lance', gl: 'Gunlance', cb: 'Strongarm', lbg: 'Blitz', bow: 'Bow', hbg: 'Assault',
+  sns: 'Edge',  gs: 'Blade',     ls: 'Sword',    hmr: 'Hammer', hh: 'Horn',
+  db:  'Fangs', lnc: 'Lance',    gl: 'Gunlance', sa:  'Axe',    cb: 'Strongarm',
+  ig:  'Glaive', lbg: 'Blitz',  bow: 'Bow',      hbg: 'Assault',
 };
 
 // Display names for common (generic) materials
@@ -427,7 +490,7 @@ MONSTERS.sort((a, b) => a.name.localeCompare(b.name));
 function buildWeapons() {
   const out = [];
   for (const m of MONSTERS) {
-    const types = WEAPONS_BY_TIER[m.stars] || WEAPONS_BY_TIER[6];
+    const types = MONSTER_WEAPONS[m.id] || [];
     for (const typeId of types) {
       out.push({
         id: `${m.id}__${typeId}`,
@@ -468,6 +531,7 @@ const ARMOR_BY_ID   = Object.fromEntries(ARMOR.map(a => [a.id, a]));
 // Thresholds must be sorted ascending by grade.
 
 
+
 const SKILL_NAMES = {
   'abnormal_status_enhancement': 'Status Sneak Attack',
   'airborne': 'Skyward Striker',
@@ -504,6 +568,7 @@ const SKILL_NAMES = {
   'dragon_attack': 'Dragon Attack',
   'dragon_attack_boost_secret': 'Advanced Dragon Attack',
   'earplugs': 'Earplugs',
+  'elder_dragon_resonance': 'Hunter's Unity',
   'ending_shot': 'Final Shot',
   'enhancement_normal_ammo': 'Normal/Element Ammo Boost',
   'enhancement_slicing_ammo': 'Slicing Ammo Boost',
@@ -600,12 +665,40 @@ const GEAR_SKILLS = {
     { id: 'guarding_reload', thresholds: [[3, 1]
     ] }
   ],
+  'aknosom__db': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'aknosom__gl': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'aknosom__gs': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
   'aknosom__head': [
     { id: 'guarding_reload', thresholds: [[3, 1], [6, 2]
     ] }
   ],
+  'aknosom__ig': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
   'aknosom__legs': [
     { id: 'fire_attack', thresholds: [[3, 1], [6, 2]
+    ] }
+  ],
+  'aknosom__lnc': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'aknosom__ls': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'aknosom__sa': [
+    { id: 'lock_on', thresholds: [[8, 1]
     ] }
   ],
   'aknosom__waist': [
@@ -620,10 +713,22 @@ const GEAR_SKILLS = {
     { id: 'ballistic', thresholds: [[4, 1]
     ] }
   ],
+  'almudron__bow': [
+    { id: 'water_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'almudron__chest': [
     { id: 'water_attack', thresholds: [[4, 1], [6, 2]
     ] },
     { id: 'water_attack_boost_secret', thresholds: [[4, 1]
+    ] }
+  ],
+  'almudron__db': [
+    { id: 'water_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'almudron__gl': [
+    { id: 'water_attack', thresholds: [[8, 1]
     ] }
   ],
   'almudron__head': [
@@ -634,10 +739,26 @@ const GEAR_SKILLS = {
     { id: 'water_attack_boost_secret', thresholds: [[4, 1]
     ] }
   ],
+  'almudron__hmr': [
+    { id: 'water_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'almudron__lbg': [
+    { id: 'water_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'almudron__legs': [
     { id: 'feat_of_agility', thresholds: [[4, 1], [8, 2]
     ] },
     { id: 'lock_on', thresholds: [[6, 1]
+    ] }
+  ],
+  'almudron__ls': [
+    { id: 'water_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'almudron__sa': [
+    { id: 'water_attack', thresholds: [[8, 1]
     ] }
   ],
   'almudron__waist': [
@@ -652,8 +773,28 @@ const GEAR_SKILLS = {
     { id: 'fire_attack', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'anjanath__bow': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
   'anjanath__chest': [
     { id: 'special_boost', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'anjanath__db': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'anjanath__gl': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'anjanath__gs': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'anjanath__hbg': [
+    { id: 'rising_tide', thresholds: [[8, 1]
     ] }
   ],
   'anjanath__head': [
@@ -662,8 +803,36 @@ const GEAR_SKILLS = {
     { id: 'fire_resistance', thresholds: [[6, 1]
     ] }
   ],
+  'anjanath__hh': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'anjanath__hmr': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'anjanath__ig': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'anjanath__lbg': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
   'anjanath__legs': [
     { id: 'peak_performance', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'anjanath__ls': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'anjanath__sa': [
+    { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'anjanath__sns': [
+    { id: 'rising_tide', thresholds: [[8, 1]
     ] }
   ],
   'anjanath__waist': [
@@ -678,8 +847,20 @@ const GEAR_SKILLS = {
     { id: 'focus', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'arzuros__bow': [
+    { id: 'special_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'arzuros__chest': [
     { id: 'multi_attack_boost', thresholds: [[2, 1], [4, 2], [6, 3]
+    ] }
+  ],
+  'arzuros__db': [
+    { id: 'special_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'arzuros__hbg': [
+    { id: 'special_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'arzuros__head': [
@@ -688,10 +869,26 @@ const GEAR_SKILLS = {
     { id: 'multiplayer_boost', thresholds: [[4, 1]
     ] }
   ],
+  'arzuros__hh': [
+    { id: 'special_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'arzuros__hmr': [
+    { id: 'special_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'arzuros__legs': [
     { id: 'brutal_strike', thresholds: [[2, 1]
     ] },
     { id: 'special_boost', thresholds: [[6, 1]
+    ] }
+  ],
+  'arzuros__ls': [
+    { id: 'special_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'arzuros__sa': [
+    { id: 'special_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'arzuros__waist': [
@@ -706,10 +903,34 @@ const GEAR_SKILLS = {
     { id: 'thunder_attack_boost_secret', thresholds: [[5, 1]
     ] }
   ],
+  'astalos__bow': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__cb': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
   'astalos__chest': [
     { id: 'auto_just_dodge', thresholds: [[6, 1], [8, 2]
     ] },
     { id: 'thunder_attack_boost_secret', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__db': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__gl': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__gs': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__hbg': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
     ] }
   ],
   'astalos__head': [
@@ -720,10 +941,42 @@ const GEAR_SKILLS = {
     { id: 'thunder_attack_boost_secret', thresholds: [[5, 1]
     ] }
   ],
+  'astalos__hh': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__hmr': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__ig': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__lbg': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
   'astalos__legs': [
     { id: 'thunder_attack', thresholds: [[6, 1], [8, 2]
     ] },
     { id: 'thunder_attack_boost_secret', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__lnc': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__ls': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__sa': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
+    ] }
+  ],
+  'astalos__sns': [
+    { id: 'thunder_attack', thresholds: [[5, 1]
     ] }
   ],
   'astalos__waist': [
@@ -738,20 +991,60 @@ const GEAR_SKILLS = {
     { id: 'critical_boost', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'azure_rathalos__bow': [
+    { id: 'special_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'azure_rathalos__cb': [
+    { id: 'special_boost', thresholds: [[8, 1]
+    ] }
+  ],
   'azure_rathalos__chest': [
     { id: 'earplugs', thresholds: [[5, 1], [6, 2]
     ] },
     { id: 'fire_attack', thresholds: [[5, 1]
     ] }
   ],
+  'azure_rathalos__gl': [
+    { id: 'special_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'azure_rathalos__gs': [
+    { id: 'special_boost', thresholds: [[8, 1]
+    ] }
+  ],
   'azure_rathalos__head': [
     { id: 'focus', thresholds: [[5, 1], [6, 2]
+    ] }
+  ],
+  'azure_rathalos__ig': [
+    { id: 'special_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'azure_rathalos__lbg': [
+    { id: 'special_boost', thresholds: [[8, 1]
     ] }
   ],
   'azure_rathalos__legs': [
     { id: 'fire_attack', thresholds: [[6, 1]
     ] },
     { id: 'reload_speed', thresholds: [[5, 2]
+    ] }
+  ],
+  'azure_rathalos__lnc': [
+    { id: 'special_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'azure_rathalos__ls': [
+    { id: 'special_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'azure_rathalos__sa': [
+    { id: 'special_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'azure_rathalos__sns': [
+    { id: 'special_boost', thresholds: [[8, 1]
     ] }
   ],
   'azure_rathalos__waist': [
@@ -766,10 +1059,26 @@ const GEAR_SKILLS = {
     { id: 'tremor_resistance', thresholds: [[4, 1]
     ] }
   ],
+  'banbaro__bow': [
+    { id: 'firm_foothold', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'banbaro__chest': [
     { id: 'concentration', thresholds: [[3, 1]
     ] },
     { id: 'partbreaker', thresholds: [[6, 1]
+    ] }
+  ],
+  'banbaro__db': [
+    { id: 'firm_foothold', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'banbaro__gl': [
+    { id: 'firm_foothold', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'banbaro__gs': [
+    { id: 'firm_foothold', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'banbaro__head': [
@@ -778,10 +1087,26 @@ const GEAR_SKILLS = {
     { id: 'tremor_resistance', thresholds: [[3, 1]
     ] }
   ],
+  'banbaro__hmr': [
+    { id: 'firm_foothold', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'banbaro__lbg': [
+    { id: 'firm_foothold', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'banbaro__legs': [
     { id: 'concentration', thresholds: [[6, 1]
     ] },
     { id: 'divine_blessing', thresholds: [[3, 1]
+    ] }
+  ],
+  'banbaro__ls': [
+    { id: 'firm_foothold', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'banbaro__sa': [
+    { id: 'firm_foothold', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'banbaro__waist': [
@@ -794,10 +1119,34 @@ const GEAR_SKILLS = {
     { id: 'ice_attack', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'barioth__bow': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__cb': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'barioth__chest': [
     { id: 'ice_attack', thresholds: [[6, 1]
     ] },
     { id: 'ice_resistance', thresholds: [[4, 1]
+    ] }
+  ],
+  'barioth__db': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__gl': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__gs': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__hbg': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'barioth__head': [
@@ -806,10 +1155,42 @@ const GEAR_SKILLS = {
     { id: 'evade_extender', thresholds: [[4, 1]
     ] }
   ],
+  'barioth__hh': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__hmr': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__ig': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__lbg': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'barioth__legs': [
     { id: 'evade_extender', thresholds: [[6, 1]
     ] },
     { id: 'sneak_attack', thresholds: [[4, 1]
+    ] }
+  ],
+  'barioth__lnc': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__ls': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__sa': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'barioth__sns': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'barioth__waist': [
@@ -826,16 +1207,48 @@ const GEAR_SKILLS = {
     { id: 'offensive_guard', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'barroth__gl': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'barroth__gs': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'barroth__head': [
     { id: 'defense_boost', thresholds: [[2, 1]
     ] },
     { id: 'offensive_guard', thresholds: [[4, 1]
     ] }
   ],
+  'barroth__hh': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'barroth__hmr': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'barroth__lbg': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'barroth__legs': [
     { id: 'defense_boost', thresholds: [[4, 1], [6, 2]
     ] },
     { id: 'recoil_down', thresholds: [[2, 1]
+    ] }
+  ],
+  'barroth__lnc': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'barroth__sa': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'barroth__sns': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'barroth__waist': [
@@ -848,18 +1261,46 @@ const GEAR_SKILLS = {
     { id: 'recoil_down', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'basarios__cb': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
   'basarios__chest': [
     { id: 'artillery', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'basarios__hbg': [
+    { id: 'heroics', thresholds: [[8, 1]
     ] }
   ],
   'basarios__head': [
     { id: 'sleep_resistance', thresholds: [[2, 1], [4, 2]
     ] }
   ],
+  'basarios__hh': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'basarios__hmr': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'basarios__lbg': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
   'basarios__legs': [
     { id: 'artillery', thresholds: [[2, 1]
     ] },
     { id: 'guard', thresholds: [[4, 1]
+    ] }
+  ],
+  'basarios__lnc': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'basarios__ls': [
+    { id: 'heroics', thresholds: [[8, 1]
     ] }
   ],
   'basarios__waist': [
@@ -874,16 +1315,44 @@ const GEAR_SKILLS = {
     { id: 'bravery', thresholds: [[5, 1], [6, 2], [8, 3]
     ] }
   ],
+  'bazelgeuse__db': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'bazelgeuse__gl': [
+    { id: 'artillery', thresholds: [[8, 1]
+    ] }
+  ],
   'bazelgeuse__head': [
     { id: 'artillery', thresholds: [[8, 1]
     ] },
     { id: 'reload_speed', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'bazelgeuse__hh': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'bazelgeuse__lbg': [
+    { id: 'evasive_reload', thresholds: [[8, 2]
+    ] }
+  ],
   'bazelgeuse__legs': [
     { id: 'blast_attack', thresholds: [[6, 1]
     ] },
     { id: 'bravery', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'bazelgeuse__lnc': [
+    { id: 'offensive_guard', thresholds: [[8, 2]
+    ] }
+  ],
+  'bazelgeuse__ls': [
+    { id: 'feat_of_agility', thresholds: [[8, 1]
+    ] }
+  ],
+  'bazelgeuse__sa': [
+    { id: 'burst', thresholds: [[8, 2]
     ] }
   ],
   'bazelgeuse__waist': [
@@ -896,14 +1365,34 @@ const GEAR_SKILLS = {
     { id: 'lock_on', thresholds: [[4, 1]
     ] }
   ],
+  'beotodus__cb': [
+    { id: 'bravery', thresholds: [[8, 1]
+    ] }
+  ],
   'beotodus__chest': [
     { id: 'charge_up', thresholds: [[4, 1]
     ] },
     { id: 'slugger', thresholds: [[6, 2]
     ] }
   ],
+  'beotodus__db': [
+    { id: 'bravery', thresholds: [[8, 1]
+    ] }
+  ],
+  'beotodus__gs': [
+    { id: 'bravery', thresholds: [[8, 1]
+    ] }
+  ],
   'beotodus__head': [
     { id: 'peak_performance', thresholds: [[4, 2], [6, 3]
+    ] }
+  ],
+  'beotodus__ig': [
+    { id: 'bravery', thresholds: [[8, 1]
+    ] }
+  ],
+  'beotodus__lbg': [
+    { id: 'bravery', thresholds: [[8, 1]
     ] }
   ],
   'beotodus__legs': [
@@ -922,20 +1411,44 @@ const GEAR_SKILLS = {
     { id: 'slugger', thresholds: [[3, 1], [6, 2]
     ] }
   ],
+  'bishaten__bow': [
+    { id: 'multi_attack_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'bishaten__chest': [
     { id: 'burst', thresholds: [[4, 1], [6, 2]
     ] },
     { id: 'reload_speed', thresholds: [[3, 1]
     ] }
   ],
+  'bishaten__hbg': [
+    { id: 'multi_attack_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'bishaten__head': [
     { id: 'pursuit_paralysis', thresholds: [[3, 1], [6, 2]
+    ] }
+  ],
+  'bishaten__hmr': [
+    { id: 'multi_attack_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'bishaten__lbg': [
+    { id: 'multi_attack_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'bishaten__legs': [
     { id: 'feat_of_agility', thresholds: [[3, 1]
     ] },
     { id: 'focus', thresholds: [[6, 2]
+    ] }
+  ],
+  'bishaten__sa': [
+    { id: 'multi_attack_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'bishaten__sns': [
+    { id: 'multi_attack_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'bishaten__waist': [
@@ -950,10 +1463,26 @@ const GEAR_SKILLS = {
     { id: 'resentment', thresholds: [[5, 1]
     ] }
   ],
+  'black_diablos__bow': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'black_diablos__cb': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
   'black_diablos__chest': [
     { id: 'firm_foothold', thresholds: [[6, 1]
     ] },
     { id: 'resentment', thresholds: [[5, 2]
+    ] }
+  ],
+  'black_diablos__db': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'black_diablos__hbg': [
+    { id: 'partbreaker', thresholds: [[8, 1]
     ] }
   ],
   'black_diablos__head': [
@@ -962,10 +1491,22 @@ const GEAR_SKILLS = {
     { id: 'resentment', thresholds: [[6, 1]
     ] }
   ],
+  'black_diablos__hmr': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'black_diablos__ig': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
   'black_diablos__legs': [
     { id: 'heroics', thresholds: [[5, 1]
     ] },
     { id: 'offensive_guard', thresholds: [[6, 1]
+    ] }
+  ],
+  'black_diablos__sa': [
+    { id: 'partbreaker', thresholds: [[8, 1]
     ] }
   ],
   'black_diablos__waist': [
@@ -982,6 +1523,14 @@ const GEAR_SKILLS = {
     { id: 'reload_speed', thresholds: [[6, 1]
     ] }
   ],
+  'brute_tigrex__bow': [
+    { id: 'ballistic', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'brute_tigrex__cb': [
+    { id: 'evasive_reload', thresholds: [[5, 1], [6, 2], [8, 3], [10, 5]
+    ] }
+  ],
   'brute_tigrex__chest': [
     { id: 'attack_boost', thresholds: [[8, 1]
     ] },
@@ -990,16 +1539,60 @@ const GEAR_SKILLS = {
     { id: 'lock_on', thresholds: [[6, 1]
     ] }
   ],
+  'brute_tigrex__db': [
+    { id: 'power_prolonger', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'brute_tigrex__gl': [
+    { id: 'perfect_evade_attack_boost', thresholds: [[5, 1], [6, 2], [8, 3], [10, 5]
+    ] }
+  ],
+  'brute_tigrex__gs': [
+    { id: 'armor_up', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'brute_tigrex__hbg': [
+    { id: 'guarding_reload', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
   'brute_tigrex__head': [
     { id: 'attack_boost_secret', thresholds: [[5, 1]
     ] },
     { id: 'disable_perfect_evade', thresholds: [[6, 1], [8, 2]
     ] }
   ],
+  'brute_tigrex__hh': [
+    { id: 'power_prolonger', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'brute_tigrex__ig': [
+    { id: 'power_prolonger', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'brute_tigrex__lbg': [
+    { id: 'ballistic', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
   'brute_tigrex__legs': [
     { id: 'attack_boost_secret', thresholds: [[5, 1]
     ] },
     { id: 'burst_dodger', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'brute_tigrex__lnc': [
+    { id: 'move_forward_strengthen', thresholds: [[5, 1], [6, 2], [8, 3], [10, 5]
+    ] }
+  ],
+  'brute_tigrex__ls': [
+    { id: 'feat_of_agility', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'brute_tigrex__sa': [
+    { id: 'armor_up', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'brute_tigrex__sns': [
+    { id: 'perfect_evade_attack_boost', thresholds: [[5, 1], [6, 2], [8, 3], [10, 5]
     ] }
   ],
   'brute_tigrex__waist': [
@@ -1014,10 +1607,46 @@ const GEAR_SKILLS = {
     { id: 'chameleos_poison', thresholds: [[6, 1]
     ] }
   ],
+  'chameleos__bow': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__cb': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
   'chameleos__chest': [
     { id: 'chameleos_poison', thresholds: [[6, 1]
     ] },
     { id: 'focus', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'chameleos__db': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__gl': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__gs': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__hbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'sneak_attack', thresholds: [[8, 2]
     ] }
   ],
   'chameleos__head': [
@@ -1028,12 +1657,48 @@ const GEAR_SKILLS = {
     { id: 'pursuit_poison', thresholds: [[6, 1]
     ] }
   ],
+  'chameleos__hh': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__hmr': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__ig': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__lbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'sneak_attack', thresholds: [[8, 2]
+    ] }
+  ],
   'chameleos__legs': [
     { id: 'chameleos_poison', thresholds: [[6, 1]
     ] },
     { id: 'guard', thresholds: [[8, 1]
     ] },
     { id: 'offensive_guard', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__ls': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] }
+  ],
+  'chameleos__sa': [
+    { id: 'abnormal_status_enhancement', thresholds: [[8, 2]
+    ] },
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
     ] }
   ],
   'chameleos__waist': [
@@ -1046,10 +1711,18 @@ const GEAR_SKILLS = {
     { id: 'armor_up', thresholds: [[2, 1], [4, 2]
     ] }
   ],
+  'chatacabra__cb': [
+    { id: 'armor_up', thresholds: [[4, 1]
+    ] }
+  ],
   'chatacabra__chest': [
     { id: 'armor_up', thresholds: [[2, 1]
     ] },
     { id: 'firm_foothold', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'chatacabra__hbg': [
+    { id: 'armor_up', thresholds: [[4, 1]
     ] }
   ],
   'chatacabra__head': [
@@ -1058,10 +1731,22 @@ const GEAR_SKILLS = {
     { id: 'sneak_attack', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'chatacabra__hmr': [
+    { id: 'armor_up', thresholds: [[4, 1]
+    ] }
+  ],
+  'chatacabra__ig': [
+    { id: 'armor_up', thresholds: [[4, 1]
+    ] }
+  ],
   'chatacabra__legs': [
     { id: 'armor_up', thresholds: [[2, 1]
     ] },
     { id: 'evasive_reload', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'chatacabra__sns': [
+    { id: 'armor_up', thresholds: [[4, 1]
     ] }
   ],
   'chatacabra__waist': [
@@ -1076,10 +1761,22 @@ const GEAR_SKILLS = {
     { id: 'rising_tide', thresholds: [[5, 1]
     ] }
   ],
+  'coral_pukei_pukei__bow': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
   'coral_pukei_pukei__chest': [
     { id: 'power_prolonger', thresholds: [[5, 1], [6, 2]
     ] },
     { id: 'rising_tide', thresholds: [[8, 1]
+    ] }
+  ],
+  'coral_pukei_pukei__gs': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'coral_pukei_pukei__hbg': [
+    { id: 'earplugs', thresholds: [[8, 1]
     ] }
   ],
   'coral_pukei_pukei__head': [
@@ -1088,10 +1785,38 @@ const GEAR_SKILLS = {
     { id: 'weakness_exploit', thresholds: [[5, 1], [8, 2]
     ] }
   ],
+  'coral_pukei_pukei__hh': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'coral_pukei_pukei__hmr': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'coral_pukei_pukei__ig': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'coral_pukei_pukei__lbg': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
   'coral_pukei_pukei__legs': [
     { id: 'power_prolonger', thresholds: [[5, 1]
     ] },
     { id: 'weakness_exploit', thresholds: [[6, 1]
+    ] }
+  ],
+  'coral_pukei_pukei__lnc': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'coral_pukei_pukei__sa': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'coral_pukei_pukei__sns': [
+    { id: 'earplugs', thresholds: [[8, 1]
     ] }
   ],
   'coral_pukei_pukei__waist': [
@@ -1106,8 +1831,32 @@ const GEAR_SKILLS = {
     { id: 'peak_performance', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'deviljho__bow': [
+    { id: 'peak_performance', thresholds: [[8, 2]
+    ] }
+  ],
+  'deviljho__cb': [
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
   'deviljho__chest': [
     { id: 'latent_power', thresholds: [[5, 1], [6, 2]
+    ] }
+  ],
+  'deviljho__db': [
+    { id: 'burst', thresholds: [[8, 2]
+    ] }
+  ],
+  'deviljho__gl': [
+    { id: 'artillery', thresholds: [[8, 1]
+    ] }
+  ],
+  'deviljho__gs': [
+    { id: 'focus', thresholds: [[8, 1]
+    ] }
+  ],
+  'deviljho__hbg': [
+    { id: 'guarding_reload', thresholds: [[8, 1]
     ] }
   ],
   'deviljho__head': [
@@ -1116,10 +1865,42 @@ const GEAR_SKILLS = {
     { id: 'slugger', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'deviljho__hh': [
+    { id: 'power_prolonger', thresholds: [[8, 1]
+    ] }
+  ],
+  'deviljho__hmr': [
+    { id: 'slugger', thresholds: [[8, 1]
+    ] }
+  ],
+  'deviljho__ig': [
+    { id: 'move_forward_strengthen', thresholds: [[8, 2]
+    ] }
+  ],
+  'deviljho__lbg': [
+    { id: 'rising_tide', thresholds: [[8, 2]
+    ] }
+  ],
   'deviljho__legs': [
     { id: 'guts', thresholds: [[5, 1], [6, 2]
     ] },
     { id: 'latent_power', thresholds: [[5, 1]
+    ] }
+  ],
+  'deviljho__lnc': [
+    { id: 'offensive_guard', thresholds: [[8, 2]
+    ] }
+  ],
+  'deviljho__ls': [
+    { id: 'feat_of_agility', thresholds: [[8, 1]
+    ] }
+  ],
+  'deviljho__sa': [
+    { id: 'morph_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'deviljho__sns': [
+    { id: 'airborne', thresholds: [[8, 2]
     ] }
   ],
   'deviljho__waist': [
@@ -1134,20 +1915,68 @@ const GEAR_SKILLS = {
     { id: 'partbreaker', thresholds: [[6, 1]
     ] }
   ],
+  'diablos__bow': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'diablos__cb': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
   'diablos__chest': [
     { id: 'heroics', thresholds: [[6, 1]
     ] },
     { id: 'slugger', thresholds: [[5, 1]
     ] }
   ],
+  'diablos__db': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'diablos__gl': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'diablos__gs': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'diablos__hbg': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
   'diablos__head': [
     { id: 'heroics', thresholds: [[5, 1], [6, 2]
+    ] }
+  ],
+  'diablos__hh': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'diablos__hmr': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'diablos__ig': [
+    { id: 'heroics', thresholds: [[8, 1]
     ] }
   ],
   'diablos__legs': [
     { id: 'partbreaker', thresholds: [[6, 1]
     ] },
     { id: 'slugger', thresholds: [[5, 2]
+    ] }
+  ],
+  'diablos__lnc': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'diablos__sa': [
+    { id: 'heroics', thresholds: [[8, 1]
+    ] }
+  ],
+  'diablos__sns': [
+    { id: 'heroics', thresholds: [[8, 1]
     ] }
   ],
   'diablos__waist': [
@@ -1160,10 +1989,18 @@ const GEAR_SKILLS = {
     { id: 'deathgaron', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'ebony_odogaron__cb': [
+    { id: 'critical_boost', thresholds: [[8, 1]
+    ] }
+  ],
   'ebony_odogaron__chest': [
     { id: 'critical_element', thresholds: [[8, 1]
     ] },
     { id: 'latent_power', thresholds: [[5, 1]
+    ] }
+  ],
+  'ebony_odogaron__db': [
+    { id: 'critical_boost', thresholds: [[8, 1]
     ] }
   ],
   'ebony_odogaron__head': [
@@ -1172,10 +2009,22 @@ const GEAR_SKILLS = {
     { id: 'resuscitate', thresholds: [[8, 1]
     ] }
   ],
+  'ebony_odogaron__ig': [
+    { id: 'critical_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'ebony_odogaron__lbg': [
+    { id: 'critical_boost', thresholds: [[8, 1]
+    ] }
+  ],
   'ebony_odogaron__legs': [
     { id: 'dragon_attack', thresholds: [[5, 1], [6, 2]
     ] },
     { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'ebony_odogaron__lnc': [
+    { id: 'critical_boost', thresholds: [[8, 1]
     ] }
   ],
   'ebony_odogaron__waist': [
@@ -1190,8 +2039,32 @@ const GEAR_SKILLS = {
     { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
     ] }
   ],
+  'espinas__bow': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__cb': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
   'espinas__chest': [
     { id: 'break_attack_boost', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'espinas__db': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__gl': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__gs': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__hbg': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
     ] }
   ],
   'espinas__head': [
@@ -1200,8 +2073,40 @@ const GEAR_SKILLS = {
     { id: 'high_performance_fire', thresholds: [[5, 1]
     ] }
   ],
+  'espinas__hh': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__hmr': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__ig': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__lbg': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
   'espinas__legs': [
     { id: 'high_performance_fire', thresholds: [[5, 1], [6, 2]
+    ] }
+  ],
+  'espinas__lnc': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__ls': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__sa': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'espinas__sns': [
+    { id: 'part_break_special_boost', thresholds: [[5, 1], [8, 2]
     ] }
   ],
   'espinas__waist': [
@@ -1214,10 +2119,30 @@ const GEAR_SKILLS = {
     { id: 'high_performance_thunder', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'fulgur_anjanath__bow': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
   'fulgur_anjanath__chest': [
     { id: 'health_boost', thresholds: [[6, 1]
     ] },
     { id: 'high_performance_thunder', thresholds: [[5, 1]
+    ] }
+  ],
+  'fulgur_anjanath__db': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
+  'fulgur_anjanath__gl': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
+  'fulgur_anjanath__gs': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
+  'fulgur_anjanath__hbg': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
     ] }
   ],
   'fulgur_anjanath__head': [
@@ -1226,10 +2151,38 @@ const GEAR_SKILLS = {
     { id: 'special_boost', thresholds: [[6, 1]
     ] }
   ],
+  'fulgur_anjanath__hh': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
+  'fulgur_anjanath__hmr': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
+  'fulgur_anjanath__ig': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
+  'fulgur_anjanath__lbg': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
   'fulgur_anjanath__legs': [
     { id: 'attack_up_critical_down', thresholds: [[6, 1]
     ] },
     { id: 'concentration', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'fulgur_anjanath__ls': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
+  'fulgur_anjanath__sa': [
+    { id: 'critical_element', thresholds: [[8, 1]
+    ] }
+  ],
+  'fulgur_anjanath__sns': [
+    { id: 'critical_element', thresholds: [[8, 1]
     ] }
   ],
   'fulgur_anjanath__waist': [
@@ -1242,20 +2195,76 @@ const GEAR_SKILLS = {
     { id: 'disable_perfect_evade', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'garangolm__bow': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__cb': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
   'garangolm__chest': [
     { id: 'guard', thresholds: [[6, 1]
     ] },
     { id: 'guard_up', thresholds: [[4, 1]
     ] }
   ],
+  'garangolm__db': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__gl': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__gs': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__hbg': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
   'garangolm__head': [
     { id: 'brutal_strike', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'garangolm__hh': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__hmr': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__ig': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__lbg': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
     ] }
   ],
   'garangolm__legs': [
     { id: 'disable_perfect_evade', thresholds: [[4, 1]
     ] },
     { id: 'lock_on', thresholds: [[6, 1]
+    ] }
+  ],
+  'garangolm__lnc': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__ls': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__sa': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
+    ] }
+  ],
+  'garangolm__sns': [
+    { id: 'disable_perfect_evade', thresholds: [[4, 1]
     ] }
   ],
   'garangolm__waist': [
@@ -1268,20 +2277,76 @@ const GEAR_SKILLS = {
     { id: 'weakness_exploit', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'glavenus__bow': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__cb': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
   'glavenus__chest': [
     { id: 'attack_up_critical_down', thresholds: [[6, 1], [8, 2]
     ] },
     { id: 'lock_on', thresholds: [[5, 1]
     ] }
   ],
+  'glavenus__db': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__gl': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__gs': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__hbg': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
   'glavenus__head': [
     { id: 'attack_up_critical_down', thresholds: [[5, 1], [6, 2]
+    ] }
+  ],
+  'glavenus__hh': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__hmr': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__ig': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__lbg': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
     ] }
   ],
   'glavenus__legs': [
     { id: 'artful_dodger', thresholds: [[6, 1]
     ] },
     { id: 'burst', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'glavenus__lnc': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__ls': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__sa': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'glavenus__sns': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
     ] }
   ],
   'glavenus__waist': [
@@ -1294,8 +2359,24 @@ const GEAR_SKILLS = {
     { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
     ] }
   ],
+  'gold_rathian__bow': [
+    { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'gold_rathian__cb': [
+    { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
   'gold_rathian__chest': [
     { id: 'partbreaker', thresholds: [[6, 2]
+    ] }
+  ],
+  'gold_rathian__gl': [
+    { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'gold_rathian__hbg': [
+    { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
     ] }
   ],
   'gold_rathian__head': [
@@ -1304,10 +2385,30 @@ const GEAR_SKILLS = {
     { id: 'resentment', thresholds: [[6, 1]
     ] }
   ],
+  'gold_rathian__hh': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'gold_rathian__lbg': [
+    { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
   'gold_rathian__legs': [
     { id: 'poison_attack', thresholds: [[8, 1]
     ] },
     { id: 'pursuit_poison', thresholds: [[6, 1]
+    ] }
+  ],
+  'gold_rathian__ls': [
+    { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'gold_rathian__sa': [
+    { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'gold_rathian__sns': [
+    { id: 'pursuit_poison', thresholds: [[6, 1], [8, 2]
     ] }
   ],
   'gold_rathian__waist': [
@@ -1322,10 +2423,18 @@ const GEAR_SKILLS = {
     { id: 'ice_attack_boost_secret', thresholds: [[4, 1]
     ] }
   ],
+  'gossharag__cb': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
   'gossharag__chest': [
     { id: 'ice_attack', thresholds: [[6, 1], [8, 2]
     ] },
     { id: 'ice_attack_boost_secret', thresholds: [[4, 1]
+    ] }
+  ],
+  'gossharag__gs': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
     ] }
   ],
   'gossharag__head': [
@@ -1334,10 +2443,30 @@ const GEAR_SKILLS = {
     { id: 'morph_boost', thresholds: [[6, 1]
     ] }
   ],
+  'gossharag__hmr': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'gossharag__ig': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'gossharag__lbg': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
   'gossharag__legs': [
     { id: 'lock_on', thresholds: [[6, 1]
     ] },
     { id: 'morph_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'gossharag__lnc': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'gossharag__sns': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
     ] }
   ],
   'gossharag__waist': [
@@ -1352,18 +2481,38 @@ const GEAR_SKILLS = {
     { id: 'sneak_attack', thresholds: [[2, 1]
     ] }
   ],
+  'great_girros__cb': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'great_girros__chest': [
     { id: 'paralysis_resistance', thresholds: [[2, 1]
     ] },
     { id: 'sneak_attack', thresholds: [[6, 1]
     ] }
   ],
+  'great_girros__gl': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'great_girros__gs': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'great_girros__head': [
     { id: 'paralysis_resistance', thresholds: [[2, 1], [4, 2]
     ] }
   ],
+  'great_girros__hmr': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'great_girros__legs': [
     { id: 'paralysis_attack', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'great_girros__sns': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
     ] }
   ],
   'great_girros__waist': [
@@ -1378,16 +2527,44 @@ const GEAR_SKILLS = {
     { id: 'water_attack', thresholds: [[4, 1]
     ] }
   ],
+  'great_jagras__cb': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'great_jagras__chest': [
     { id: 'rising_tide', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'great_jagras__gl': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'great_jagras__gs': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'great_jagras__hbg': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'great_jagras__head': [
     { id: 'firm_foothold', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'great_jagras__lbg': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'great_jagras__legs': [
     { id: 'water_attack', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'great_jagras__sa': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'great_jagras__sns': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'great_jagras__waist': [
@@ -1400,18 +2577,38 @@ const GEAR_SKILLS = {
     { id: 'critical_eye', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'great_wroggi__bow': [
+    { id: 'focus', thresholds: [[4, 1]
+    ] }
+  ],
   'great_wroggi__chest': [
     { id: 'ending_shot', thresholds: [[2, 1]
     ] },
     { id: 'recoil_down', thresholds: [[6, 1]
     ] }
   ],
+  'great_wroggi__db': [
+    { id: 'lock_on', thresholds: [[4, 1]
+    ] }
+  ],
   'great_wroggi__head': [
     { id: 'power_prolonger', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'great_wroggi__hmr': [
+    { id: 'lock_on', thresholds: [[4, 1]
+    ] }
+  ],
   'great_wroggi__legs': [
     { id: 'ending_shot', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'great_wroggi__ls': [
+    { id: 'lock_on', thresholds: [[4, 1]
+    ] }
+  ],
+  'great_wroggi__sns': [
+    { id: 'lock_on', thresholds: [[4, 1]
     ] }
   ],
   'great_wroggi__waist': [
@@ -1422,10 +2619,34 @@ const GEAR_SKILLS = {
     { id: 'water_attack', thresholds: [[3, 1], [6, 2]
     ] }
   ],
+  'jyuratodus__bow': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__cb': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
   'jyuratodus__chest': [
     { id: 'last_stand', thresholds: [[4, 1]
     ] },
     { id: 'water_attack', thresholds: [[3, 1]
+    ] }
+  ],
+  'jyuratodus__db': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__gl': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__gs': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__hbg': [
+    { id: 'last_stand', thresholds: [[8, 1]
     ] }
   ],
   'jyuratodus__head': [
@@ -1434,10 +2655,42 @@ const GEAR_SKILLS = {
     { id: 'water_resistance', thresholds: [[3, 1]
     ] }
   ],
+  'jyuratodus__hh': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__hmr': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__ig': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__lbg': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
   'jyuratodus__legs': [
     { id: 'focus', thresholds: [[3, 1], [6, 2]
     ] },
     { id: 'last_stand', thresholds: [[4, 1]
+    ] }
+  ],
+  'jyuratodus__lnc': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__ls': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__sa': [
+    { id: 'last_stand', thresholds: [[8, 1]
+    ] }
+  ],
+  'jyuratodus__sns': [
+    { id: 'last_stand', thresholds: [[8, 1]
     ] }
   ],
   'jyuratodus__waist': [
@@ -1450,8 +2703,24 @@ const GEAR_SKILLS = {
     { id: 'sp_insurance', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'khezu__bow': [
+    { id: 'peak_performance', thresholds: [[8, 1]
+    ] }
+  ],
   'khezu__chest': [
     { id: 'thunder_attack', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'khezu__db': [
+    { id: 'peak_performance', thresholds: [[8, 1]
+    ] }
+  ],
+  'khezu__gl': [
+    { id: 'peak_performance', thresholds: [[8, 1]
+    ] }
+  ],
+  'khezu__gs': [
+    { id: 'peak_performance', thresholds: [[8, 1]
     ] }
   ],
   'khezu__head': [
@@ -1460,10 +2729,34 @@ const GEAR_SKILLS = {
     { id: 'sp_insurance', thresholds: [[6, 1]
     ] }
   ],
+  'khezu__hh': [
+    { id: 'peak_performance', thresholds: [[8, 1]
+    ] }
+  ],
+  'khezu__hmr': [
+    { id: 'peak_performance', thresholds: [[8, 1]
+    ] }
+  ],
+  'khezu__ig': [
+    { id: 'peak_performance', thresholds: [[8, 1]
+    ] }
+  ],
+  'khezu__lbg': [
+    { id: 'peak_performance', thresholds: [[8, 1]
+    ] }
+  ],
   'khezu__legs': [
     { id: 'focus', thresholds: [[4, 1]
     ] },
     { id: 'slugger', thresholds: [[6, 1]
+    ] }
+  ],
+  'khezu__sa': [
+    { id: 'peak_performance', thresholds: [[8, 1]
+    ] }
+  ],
+  'khezu__sns': [
+    { id: 'peak_performance', thresholds: [[8, 1]
     ] }
   ],
   'khezu__waist': [
@@ -1486,6 +2779,24 @@ const GEAR_SKILLS = {
     { id: 'kirin_robe', thresholds: [[6, 1]
     ] }
   ],
+  'kirin__db': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
+  'kirin__gs': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
+  'kirin__hbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
   'kirin__head': [
     { id: 'fighting_spirit', thresholds: [[8, 1]
     ] },
@@ -1494,10 +2805,46 @@ const GEAR_SKILLS = {
     { id: 'lock_on', thresholds: [[6, 1]
     ] }
   ],
+  'kirin__hh': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
+  'kirin__ig': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
+  'kirin__lbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
   'kirin__legs': [
     { id: 'kirin_robe', thresholds: [[6, 1]
     ] },
     { id: 'recoil_down', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'kirin__lnc': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
+  'kirin__sa': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
+    ] }
+  ],
+  'kirin__sns': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'latent_power', thresholds: [[8, 1]
     ] }
   ],
   'kirin__waist': [
@@ -1514,8 +2861,16 @@ const GEAR_SKILLS = {
     { id: 'last_stand', thresholds: [[2, 1]
     ] }
   ],
+  'kulu_ya_ku__bow': [
+    { id: 'fortify', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'kulu_ya_ku__chest': [
     { id: 'guts', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'kulu_ya_ku__db': [
+    { id: 'fortify', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'kulu_ya_ku__head': [
@@ -1524,8 +2879,28 @@ const GEAR_SKILLS = {
     { id: 'lock_on', thresholds: [[2, 1]
     ] }
   ],
+  'kulu_ya_ku__hh': [
+    { id: 'fortify', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'kulu_ya_ku__hmr': [
+    { id: 'fortify', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'kulu_ya_ku__ig': [
+    { id: 'fortify', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'kulu_ya_ku__legs': [
     { id: 'critical_eye', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'kulu_ya_ku__lnc': [
+    { id: 'fortify', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'kulu_ya_ku__ls': [
+    { id: 'fortify', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'kulu_ya_ku__waist': [
@@ -1542,12 +2917,48 @@ const GEAR_SKILLS = {
     { id: 'kushala_bless', thresholds: [[6, 1]
     ] }
   ],
+  'kushala_daora__bow': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__cb': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
   'kushala_daora__chest': [
     { id: 'health_boost', thresholds: [[8, 1]
     ] },
     { id: 'kushala_bless', thresholds: [[6, 1]
     ] },
     { id: 'partbreaker', thresholds: [[6, 1]
+    ] }
+  ],
+  'kushala_daora__db': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__gl': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__gs': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__hbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
     ] }
   ],
   'kushala_daora__head': [
@@ -1558,12 +2969,60 @@ const GEAR_SKILLS = {
     { id: 'reload_speed', thresholds: [[6, 1]
     ] }
   ],
+  'kushala_daora__hh': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__hmr': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__ig': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__lbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
   'kushala_daora__legs': [
     { id: 'airborne', thresholds: [[6, 1]
     ] },
     { id: 'artful_dodger', thresholds: [[8, 1]
     ] },
     { id: 'kushala_bless', thresholds: [[6, 1]
+    ] }
+  ],
+  'kushala_daora__lnc': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__ls': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__sa': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
+    ] }
+  ],
+  'kushala_daora__sns': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'windproof', thresholds: [[8, 2]
     ] }
   ],
   'kushala_daora__waist': [
@@ -1584,14 +3043,42 @@ const GEAR_SKILLS = {
     { id: 'attack_boost', thresholds: [[2, 1], [4, 2], [6, 3]
     ] }
   ],
+  'lagombi__db': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'lagombi__gl': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'lagombi__gs': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'lagombi__hbg': [
+    { id: 'guard', thresholds: [[8, 1]
+    ] }
+  ],
   'lagombi__head': [
     { id: 'evade_extender', thresholds: [[4, 1]
     ] },
     { id: 'special_boost', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'lagombi__ig': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
   'lagombi__legs': [
     { id: 'ice_attack', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'lagombi__ls': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'lagombi__sa': [
+    { id: 'lock_on', thresholds: [[8, 1]
     ] }
   ],
   'lagombi__waist': [
@@ -1602,10 +3089,34 @@ const GEAR_SKILLS = {
     { id: 'reload_speed', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'legiana__bow': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__cb': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
   'legiana__chest': [
     { id: 'divine_blessing', thresholds: [[5, 2]
     ] },
     { id: 'windproof', thresholds: [[6, 1]
+    ] }
+  ],
+  'legiana__db': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__gl': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__gs': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__hbg': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
     ] }
   ],
   'legiana__head': [
@@ -1614,10 +3125,38 @@ const GEAR_SKILLS = {
     { id: 'ice_attack', thresholds: [[6, 1]
     ] }
   ],
+  'legiana__hh': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__ig': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__lbg': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
   'legiana__legs': [
     { id: 'ice_resistance', thresholds: [[6, 1]
     ] },
     { id: 'reload_speed', thresholds: [[5, 1]
+    ] }
+  ],
+  'legiana__lnc': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__ls': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__sa': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'legiana__sns': [
+    { id: 'divine_blessing', thresholds: [[5, 1], [8, 2]
     ] }
   ],
   'legiana__waist': [
@@ -1630,8 +3169,32 @@ const GEAR_SKILLS = {
     { id: 'charge_up', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'lunagaron__bow': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__cb': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
   'lunagaron__chest': [
     { id: 'high_performance_ice', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'lunagaron__db': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__gl': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__gs': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__hbg': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
     ] }
   ],
   'lunagaron__head': [
@@ -1640,10 +3203,42 @@ const GEAR_SKILLS = {
     { id: 'recoil_down', thresholds: [[4, 1], [8, 2]
     ] }
   ],
+  'lunagaron__hh': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__hmr': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__ig': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__lbg': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
   'lunagaron__legs': [
     { id: 'ballistic', thresholds: [[4, 1], [8, 2]
     ] },
     { id: 'burst', thresholds: [[6, 1]
+    ] }
+  ],
+  'lunagaron__lnc': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__ls': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__sa': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
+    ] }
+  ],
+  'lunagaron__sns': [
+    { id: 'high_performance_ice', thresholds: [[8, 1]
     ] }
   ],
   'lunagaron__waist': [
@@ -1654,20 +3249,76 @@ const GEAR_SKILLS = {
     { id: 'blast_attack', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'magnamalo__bow': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__cb': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
   'magnamalo__chest': [
     { id: 'blast_resistance', thresholds: [[6, 1]
     ] },
     { id: 'reload_speed', thresholds: [[4, 2]
     ] }
   ],
+  'magnamalo__db': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__gl': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__gs': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__hbg': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
   'magnamalo__head': [
     { id: 'hellfire_cloak', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'magnamalo__hh': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__hmr': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__ig': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__lbg': [
+    { id: 'partbreaker', thresholds: [[8, 1]
     ] }
   ],
   'magnamalo__legs': [
     { id: 'blast_attack', thresholds: [[4, 1]
     ] },
     { id: 'sneak_attack', thresholds: [[6, 1]
+    ] }
+  ],
+  'magnamalo__lnc': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__ls': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__sa': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'magnamalo__sns': [
+    { id: 'partbreaker', thresholds: [[8, 1]
     ] }
   ],
   'magnamalo__waist': [
@@ -1684,10 +3335,46 @@ const GEAR_SKILLS = {
     { id: 'resuscitate', thresholds: [[8, 1]
     ] }
   ],
+  'malzeno__bow': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__cb': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
   'malzeno__chest': [
     { id: 'bloodblight_cloak', thresholds: [[6, 1], [8, 2]
     ] },
     { id: 'malzeno_blood', thresholds: [[6, 1]
+    ] }
+  ],
+  'malzeno__db': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__gl': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__gs': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__hbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
     ] }
   ],
   'malzeno__head': [
@@ -1696,10 +3383,58 @@ const GEAR_SKILLS = {
     { id: 'malzeno_blood', thresholds: [[6, 1]
     ] }
   ],
+  'malzeno__hh': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__hmr': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__ig': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__lbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
   'malzeno__legs': [
     { id: 'break_attack_boost', thresholds: [[6, 1], [8, 2]
     ] },
     { id: 'malzeno_blood', thresholds: [[6, 1]
+    ] }
+  ],
+  'malzeno__lnc': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__ls': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__sa': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
+    ] }
+  ],
+  'malzeno__sns': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'high_performance_dragon', thresholds: [[8, 1]
     ] }
   ],
   'malzeno__waist': [
@@ -1714,16 +3449,72 @@ const GEAR_SKILLS = {
     { id: 'resuscitate', thresholds: [[6, 1]
     ] }
   ],
+  'mizutsune__bow': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__cb': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
   'mizutsune__chest': [
     { id: 'bubbly_dance', thresholds: [[5, 1], [6, 2]
+    ] }
+  ],
+  'mizutsune__db': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__gl': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__gs': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__hbg': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
     ] }
   ],
   'mizutsune__head': [
     { id: 'water_attack', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'mizutsune__hh': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__hmr': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__ig': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__lbg': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
   'mizutsune__legs': [
     { id: 'resuscitate', thresholds: [[5, 1], [6, 2]
+    ] }
+  ],
+  'mizutsune__lnc': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__ls': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__sa': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'mizutsune__sns': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
     ] }
   ],
   'mizutsune__waist': [
@@ -1738,12 +3529,36 @@ const GEAR_SKILLS = {
     { id: 'weakness_exploit', thresholds: [[8, 1]
     ] }
   ],
+  'namielle__bow': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
+  'namielle__cb': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
   'namielle__chest': [
     { id: 'critical_boost', thresholds: [[8, 1]
     ] },
     { id: 'latent_power', thresholds: [[6, 1]
     ] },
     { id: 'namielle_wave', thresholds: [[6, 1]
+    ] }
+  ],
+  'namielle__gl': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
+  'namielle__hbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
     ] }
   ],
   'namielle__head': [
@@ -1754,10 +3569,52 @@ const GEAR_SKILLS = {
     { id: 'reload_speed', thresholds: [[6, 1]
     ] }
   ],
+  'namielle__hh': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
+  'namielle__ig': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
+  'namielle__lbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
   'namielle__legs': [
     { id: 'namielle_wave', thresholds: [[6, 1]
     ] },
     { id: 'perfect_evade_attack_boost', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'namielle__lnc': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
+  'namielle__ls': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
+  'namielle__sa': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
+  'namielle__sns': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'weakness_exploit', thresholds: [[8, 1]
     ] }
   ],
   'namielle__waist': [
@@ -1770,10 +3627,34 @@ const GEAR_SKILLS = {
     { id: 'buildup_boost', thresholds: [[5, 1], [6, 2], [8, 3]
     ] }
   ],
+  'nargacuga__bow': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__cb': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
   'nargacuga__chest': [
     { id: 'critical_boost', thresholds: [[5, 1], [8, 2]
     ] },
     { id: 'lock_on', thresholds: [[6, 1]
+    ] }
+  ],
+  'nargacuga__db': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__gl': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__gs': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__hbg': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
     ] }
   ],
   'nargacuga__head': [
@@ -1782,10 +3663,42 @@ const GEAR_SKILLS = {
     { id: 'focus', thresholds: [[6, 1]
     ] }
   ],
+  'nargacuga__hh': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__hmr': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__ig': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__lbg': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
   'nargacuga__legs': [
     { id: 'artful_dodger', thresholds: [[6, 1]
     ] },
     { id: 'buildup_boost', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__lnc': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__ls': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__sa': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nargacuga__sns': [
+    { id: 'resuscitate', thresholds: [[5, 1], [8, 2]
     ] }
   ],
   'nargacuga__waist': [
@@ -1802,12 +3715,48 @@ const GEAR_SKILLS = {
     { id: 'offensive_guard', thresholds: [[6, 1]
     ] }
   ],
+  'nergigante__bow': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__cb': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
   'nergigante__chest': [
     { id: 'evade_extender', thresholds: [[8, 1]
     ] },
     { id: 'nergigante_greed', thresholds: [[6, 1]
     ] },
     { id: 'sneak_attack', thresholds: [[6, 1]
+    ] }
+  ],
+  'nergigante__db': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__gl': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__gs': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__hbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
     ] }
   ],
   'nergigante__head': [
@@ -1818,12 +3767,60 @@ const GEAR_SKILLS = {
     { id: 'nergigante_greed', thresholds: [[6, 1]
     ] }
   ],
+  'nergigante__hh': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__hmr': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__ig': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__lbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
   'nergigante__legs': [
     { id: 'nergigante_greed', thresholds: [[6, 1]
     ] },
     { id: 'recoil_down', thresholds: [[8, 1]
     ] },
     { id: 'reload_speed', thresholds: [[6, 1]
+    ] }
+  ],
+  'nergigante__lnc': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__ls': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__sa': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
+    ] }
+  ],
+  'nergigante__sns': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'partbreaker', thresholds: [[8, 2]
     ] }
   ],
   'nergigante__waist': [
@@ -1838,20 +3835,60 @@ const GEAR_SKILLS = {
     { id: 'sleep_attack', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'nightshade_paolumu__bow': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'nightshade_paolumu__chest': [
     { id: 'focus', thresholds: [[5, 1], [8, 2]
     ] },
     { id: 'sleep_resistance', thresholds: [[6, 1]
     ] }
   ],
+  'nightshade_paolumu__gs': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'nightshade_paolumu__hbg': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'nightshade_paolumu__head': [
     { id: 'sleep_enhancement', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'nightshade_paolumu__hh': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'nightshade_paolumu__hmr': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'nightshade_paolumu__ig': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'nightshade_paolumu__lbg': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
     ] }
   ],
   'nightshade_paolumu__legs': [
     { id: 'abnormal_status_enhancement', thresholds: [[6, 1]
     ] },
     { id: 'sleep_enhancement', thresholds: [[5, 1]
+    ] }
+  ],
+  'nightshade_paolumu__lnc': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'nightshade_paolumu__sa': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'nightshade_paolumu__sns': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
     ] }
   ],
   'nightshade_paolumu__waist': [
@@ -1866,18 +3903,38 @@ const GEAR_SKILLS = {
     { id: 'feat_of_agility', thresholds: [[4, 1]
     ] }
   ],
+  'odogaron__cb': [
+    { id: 'perfect_evade_sp_charge', thresholds: [[8, 1]
+    ] }
+  ],
   'odogaron__chest': [
     { id: 'bleeding_resistance', thresholds: [[4, 1]
     ] },
     { id: 'critical_eye', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'odogaron__db': [
+    { id: 'perfect_evade_sp_charge', thresholds: [[8, 1]
+    ] }
+  ],
   'odogaron__head': [
     { id: 'feat_of_agility', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'odogaron__ig': [
+    { id: 'perfect_evade_sp_charge', thresholds: [[8, 1]
+    ] }
+  ],
+  'odogaron__lbg': [
+    { id: 'perfect_evade_sp_charge', thresholds: [[8, 1]
+    ] }
+  ],
   'odogaron__legs': [
     { id: 'perfect_evade_sp_charge', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'odogaron__lnc': [
+    { id: 'perfect_evade_sp_charge', thresholds: [[8, 1]
     ] }
   ],
   'odogaron__waist': [
@@ -1902,8 +3959,24 @@ const GEAR_SKILLS = {
     { id: 'windproof', thresholds: [[4, 1]
     ] }
   ],
+  'paolumu__hh': [
+    { id: 'divine_blessing', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'paolumu__lbg': [
+    { id: 'divine_blessing', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'paolumu__legs': [
     { id: 'windproof', thresholds: [[3, 1], [6, 2]
+    ] }
+  ],
+  'paolumu__sa': [
+    { id: 'divine_blessing', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'paolumu__sns': [
+    { id: 'divine_blessing', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'paolumu__waist': [
@@ -1916,10 +3989,22 @@ const GEAR_SKILLS = {
     { id: 'windproof', thresholds: [[5, 2]
     ] }
   ],
+  'pink_rathian__bow': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'pink_rathian__cb': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'pink_rathian__chest': [
     { id: 'dragon_attack', thresholds: [[5, 1]
     ] },
     { id: 'focus', thresholds: [[6, 1]
+    ] }
+  ],
+  'pink_rathian__gl': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'pink_rathian__head': [
@@ -1928,10 +4013,22 @@ const GEAR_SKILLS = {
     { id: 'windproof', thresholds: [[6, 1]
     ] }
   ],
+  'pink_rathian__hh': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'pink_rathian__legs': [
     { id: 'dragon_attack', thresholds: [[6, 1]
     ] },
     { id: 'special_boost', thresholds: [[5, 2]
+    ] }
+  ],
+  'pink_rathian__ls': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'pink_rathian__sns': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'pink_rathian__waist': [
@@ -1944,10 +4041,22 @@ const GEAR_SKILLS = {
     { id: 'poison_resistance', thresholds: [[4, 1]
     ] }
   ],
+  'pukei_pukei__bow': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'pukei_pukei__chest': [
     { id: 'focus', thresholds: [[4, 1]
     ] },
     { id: 'poison_resistance', thresholds: [[2, 1]
+    ] }
+  ],
+  'pukei_pukei__gs': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'pukei_pukei__hbg': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
     ] }
   ],
   'pukei_pukei__head': [
@@ -1956,10 +4065,34 @@ const GEAR_SKILLS = {
     { id: 'health_boost', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'pukei_pukei__hh': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'pukei_pukei__hmr': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'pukei_pukei__ig': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
   'pukei_pukei__legs': [
     { id: 'health_boost', thresholds: [[2, 1]
     ] },
     { id: 'poison_resistance', thresholds: [[4, 1]
+    ] }
+  ],
+  'pukei_pukei__lnc': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'pukei_pukei__sa': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
+    ] }
+  ],
+  'pukei_pukei__sns': [
+    { id: 'sneak_attack', thresholds: [[8, 1]
     ] }
   ],
   'pukei_pukei__waist': [
@@ -1972,10 +4105,26 @@ const GEAR_SKILLS = {
     { id: 'spare_shot', thresholds: [[2, 1]
     ] }
   ],
+  'quematrice__bow': [
+    { id: 'bravery', thresholds: [[4, 1]
+    ] }
+  ],
   'quematrice__chest': [
     { id: 'enhancement_normal_ammo', thresholds: [[2, 1], [6, 2]
     ] },
     { id: 'spare_shot', thresholds: [[4, 1]
+    ] }
+  ],
+  'quematrice__db': [
+    { id: 'bravery', thresholds: [[4, 1]
+    ] }
+  ],
+  'quematrice__gl': [
+    { id: 'bravery', thresholds: [[4, 1]
+    ] }
+  ],
+  'quematrice__gs': [
+    { id: 'bravery', thresholds: [[4, 1]
     ] }
   ],
   'quematrice__head': [
@@ -1986,6 +4135,18 @@ const GEAR_SKILLS = {
   ],
   'quematrice__legs': [
     { id: 'attack_boost', thresholds: [[2, 1], [4, 2], [6, 3]
+    ] }
+  ],
+  'quematrice__lnc': [
+    { id: 'bravery', thresholds: [[4, 1]
+    ] }
+  ],
+  'quematrice__ls': [
+    { id: 'bravery', thresholds: [[4, 1]
+    ] }
+  ],
+  'quematrice__sns': [
+    { id: 'bravery', thresholds: [[4, 1]
     ] }
   ],
   'quematrice__waist': [
@@ -2006,14 +4167,34 @@ const GEAR_SKILLS = {
     { id: 'sleep_attack', thresholds: [[2, 1]
     ] }
   ],
+  'radobaan__gs': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'radobaan__hbg': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'radobaan__head': [
     { id: 'guard', thresholds: [[2, 1], [6, 2]
+    ] }
+  ],
+  'radobaan__hh': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'radobaan__hmr': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'radobaan__legs': [
     { id: 'guard', thresholds: [[4, 1]
     ] },
     { id: 'sleep_resistance', thresholds: [[2, 1]
+    ] }
+  ],
+  'radobaan__sns': [
+    { id: 'defense_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'radobaan__waist': [
@@ -2024,20 +4205,76 @@ const GEAR_SKILLS = {
     { id: 'fighting_spirit', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'rajang__bow': [
+    { id: 'rising_tide', thresholds: [[8, 2]
+    ] }
+  ],
+  'rajang__cb': [
+    { id: 'feat_of_agility', thresholds: [[8, 1]
+    ] }
+  ],
   'rajang__chest': [
     { id: 'concentration', thresholds: [[6, 1]
     ] },
     { id: 'fighting_spirit', thresholds: [[5, 1]
     ] }
   ],
+  'rajang__db': [
+    { id: 'power_prolonger', thresholds: [[8, 2]
+    ] }
+  ],
+  'rajang__gl': [
+    { id: 'guarding_reload', thresholds: [[8, 1]
+    ] }
+  ],
+  'rajang__gs': [
+    { id: 'resentment', thresholds: [[8, 2]
+    ] }
+  ],
+  'rajang__hbg': [
+    { id: 'offensive_guard', thresholds: [[8, 2]
+    ] }
+  ],
   'rajang__head': [
     { id: 'thunder_resistance', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'rajang__hh': [
+    { id: 'attack_up_critical_down', thresholds: [[8, 1]
+    ] }
+  ],
+  'rajang__hmr': [
+    { id: 'partbreaker', thresholds: [[8, 1]
+    ] }
+  ],
+  'rajang__ig': [
+    { id: 'airborne', thresholds: [[8, 2]
+    ] }
+  ],
+  'rajang__lbg': [
+    { id: 'artillery', thresholds: [[8, 1]
     ] }
   ],
   'rajang__legs': [
     { id: 'resentment', thresholds: [[5, 1], [6, 2]
     ] },
     { id: 'tremor_resistance', thresholds: [[8, 1]
+    ] }
+  ],
+  'rajang__lnc': [
+    { id: 'burst', thresholds: [[8, 2]
+    ] }
+  ],
+  'rajang__ls': [
+    { id: 'focus', thresholds: [[8, 1]
+    ] }
+  ],
+  'rajang__sa': [
+    { id: 'fighting_spirit', thresholds: [[8, 1]
+    ] }
+  ],
+  'rajang__sns': [
+    { id: 'slugger', thresholds: [[8, 2]
     ] }
   ],
   'rajang__waist': [
@@ -2050,8 +4287,30 @@ const GEAR_SKILLS = {
     { id: 'fire_resistance', thresholds: [[5, 1]
     ] }
   ],
+  'rathalos__bow': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__cb': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
   'rathalos__chest': [
     { id: 'weakness_exploit', thresholds: [[5, 1], [6, 2]
+    ] }
+  ],
+  'rathalos__db': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] },
+    { id: 'health_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__gl': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__gs': [
+    { id: 'earplugs', thresholds: [[8, 1]
     ] }
   ],
   'rathalos__head': [
@@ -2060,10 +4319,42 @@ const GEAR_SKILLS = {
     { id: 'fire_attack', thresholds: [[6, 1]
     ] }
   ],
+  'rathalos__hh': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__hmr': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__ig': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__lbg': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
   'rathalos__legs': [
     { id: 'fire_resistance', thresholds: [[5, 1]
     ] },
     { id: 'weakness_exploit', thresholds: [[6, 1]
+    ] }
+  ],
+  'rathalos__lnc': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__ls': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__sa': [
+    { id: 'earplugs', thresholds: [[8, 1]
+    ] }
+  ],
+  'rathalos__sns': [
+    { id: 'earplugs', thresholds: [[8, 1]
     ] }
   ],
   'rathalos__waist': [
@@ -2078,8 +4369,24 @@ const GEAR_SKILLS = {
     { id: 'lock_on', thresholds: [[4, 1]
     ] }
   ],
+  'rathian__bow': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'rathian__cb': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'rathian__chest': [
     { id: 'poison_attack', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'rathian__gl': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'rathian__hbg': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'rathian__head': [
@@ -2088,8 +4395,28 @@ const GEAR_SKILLS = {
     { id: 'poison_attack', thresholds: [[6, 1]
     ] }
   ],
+  'rathian__hh': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'rathian__ig': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
   'rathian__legs': [
     { id: 'health_boost', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'rathian__ls': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'rathian__sa': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
+    ] }
+  ],
+  'rathian__sns': [
+    { id: 'health_boost', thresholds: [[4, 1], [8, 2]
     ] }
   ],
   'rathian__waist': [
@@ -2104,10 +4431,34 @@ const GEAR_SKILLS = {
     { id: 'powerhouse', thresholds: [[5, 1]
     ] }
   ],
+  'seregios__bow': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__cb': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
   'seregios__chest': [
     { id: 'burst', thresholds: [[8, 1]
     ] },
     { id: 'powerhouse', thresholds: [[5, 1]
+    ] }
+  ],
+  'seregios__db': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__gl': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__gs': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__hbg': [
+    { id: 'powerhouse', thresholds: [[8, 1]
     ] }
   ],
   'seregios__head': [
@@ -2116,12 +4467,44 @@ const GEAR_SKILLS = {
     { id: 'powerhouse_critical', thresholds: [[8, 1]
     ] }
   ],
+  'seregios__hh': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__hmr': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__ig': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__lbg': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
   'seregios__legs': [
     { id: 'lock_on', thresholds: [[5, 1]
     ] },
     { id: 'offensive_guard', thresholds: [[8, 1]
     ] },
     { id: 'powerhouse', thresholds: [[5, 1]
+    ] }
+  ],
+  'seregios__lnc': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__ls': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__sa': [
+    { id: 'powerhouse', thresholds: [[8, 1]
+    ] }
+  ],
+  'seregios__sns': [
+    { id: 'powerhouse', thresholds: [[8, 1]
     ] }
   ],
   'seregios__waist': [
@@ -2140,10 +4523,30 @@ const GEAR_SKILLS = {
     { id: 'water_attack_boost_secret', thresholds: [[4, 1]
     ] }
   ],
+  'shogun_ceanataur__bow': [
+    { id: 'break_attack_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'shogun_ceanataur__cb': [
+    { id: 'break_attack_boost', thresholds: [[8, 1]
+    ] }
+  ],
   'shogun_ceanataur__chest': [
     { id: 'enhancement_slicing_ammo', thresholds: [[4, 1]
     ] },
     { id: 'recoil_down', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'shogun_ceanataur__db': [
+    { id: 'break_attack_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'shogun_ceanataur__gs': [
+    { id: 'break_attack_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'shogun_ceanataur__hbg': [
+    { id: 'break_attack_boost', thresholds: [[8, 1]
     ] }
   ],
   'shogun_ceanataur__head': [
@@ -2152,10 +4555,22 @@ const GEAR_SKILLS = {
     { id: 'high_performance_water', thresholds: [[4, 1]
     ] }
   ],
+  'shogun_ceanataur__hmr': [
+    { id: 'break_attack_boost', thresholds: [[8, 1]
+    ] }
+  ],
   'shogun_ceanataur__legs': [
     { id: 'enhancement_slicing_ammo', thresholds: [[4, 1], [6, 2]
     ] },
     { id: 'water_attack_boost_secret', thresholds: [[4, 1]
+    ] }
+  ],
+  'shogun_ceanataur__lnc': [
+    { id: 'break_attack_boost', thresholds: [[8, 1]
+    ] }
+  ],
+  'shogun_ceanataur__ls': [
+    { id: 'break_attack_boost', thresholds: [[8, 1]
     ] }
   ],
   'shogun_ceanataur__waist': [
@@ -2168,13 +4583,49 @@ const GEAR_SKILLS = {
     { id: 'latent_power', thresholds: [[6, 2]
     ] }
   ],
+  'silver_rathalos__bow': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'silver_rathalos__cb': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
   'silver_rathalos__chest': [
     { id: 'critical_boost', thresholds: [[8, 1]
     ] },
     { id: 'fire_attack', thresholds: [[6, 1]
     ] }
   ],
+  'silver_rathalos__db': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] },
+    { id: 'pursuit_poison', thresholds: [[8, 1]
+    ] }
+  ],
+  'silver_rathalos__gl': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'silver_rathalos__gs': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
   'silver_rathalos__head': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'silver_rathalos__hmr': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'silver_rathalos__ig': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] },
+    { id: 'pursuit_poison', thresholds: [[8, 1]
+    ] }
+  ],
+  'silver_rathalos__lbg': [
     { id: 'critical_element', thresholds: [[6, 1], [8, 2]
     ] }
   ],
@@ -2182,6 +4633,22 @@ const GEAR_SKILLS = {
     { id: 'critical_element', thresholds: [[6, 1]
     ] },
     { id: 'weakness_exploit', thresholds: [[8, 1]
+    ] }
+  ],
+  'silver_rathalos__lnc': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'silver_rathalos__ls': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'silver_rathalos__sa': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
+    ] }
+  ],
+  'silver_rathalos__sns': [
+    { id: 'critical_element', thresholds: [[6, 1], [8, 2]
     ] }
   ],
   'silver_rathalos__waist': [
@@ -2192,8 +4659,20 @@ const GEAR_SKILLS = {
     { id: 'evasive_reload', thresholds: [[4, 1], [6, 2]
     ] }
   ],
+  'somnacanth__cb': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'somnacanth__chest': [
     { id: 'airborne', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'somnacanth__db': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'somnacanth__gs': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'somnacanth__head': [
@@ -2202,8 +4681,24 @@ const GEAR_SKILLS = {
     { id: 'evasive_reload', thresholds: [[4, 1]
     ] }
   ],
+  'somnacanth__hh': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'somnacanth__hmr': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'somnacanth__ig': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'somnacanth__legs': [
     { id: 'abnormal_status_enhancement', thresholds: [[4, 1], [6, 2]
+    ] }
+  ],
+  'somnacanth__ls': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'somnacanth__waist': [
@@ -2220,10 +4715,46 @@ const GEAR_SKILLS = {
     { id: 'lock_on', thresholds: [[5, 1]
     ] }
   ],
+  'stygian_zinogre__bow': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__cb': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
   'stygian_zinogre__chest': [
     { id: 'dragon_attack_boost_secret', thresholds: [[5, 1]
     ] },
     { id: 'sp_overdrive', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'stygian_zinogre__db': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__gl': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__gs': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__hbg': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
     ] }
   ],
   'stygian_zinogre__head': [
@@ -2232,8 +4763,56 @@ const GEAR_SKILLS = {
     { id: 'dragon_attack_boost_secret', thresholds: [[5, 1]
     ] }
   ],
+  'stygian_zinogre__hh': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__hmr': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__ig': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__lbg': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
   'stygian_zinogre__legs': [
     { id: 'sp_overdrive', thresholds: [[5, 1], [6, 2], [8, 3]
+    ] }
+  ],
+  'stygian_zinogre__lnc': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__ls': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__sa': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'stygian_zinogre__sns': [
+    { id: 'dragon_attack', thresholds: [[5, 1]
+    ] },
+    { id: 'dragon_attack_boost_secret', thresholds: [[8, 1]
     ] }
   ],
   'stygian_zinogre__waist': [
@@ -2250,12 +4829,36 @@ const GEAR_SKILLS = {
     { id: 'teostra_bless', thresholds: [[6, 1]
     ] }
   ],
+  'teostra__bow': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
+  'teostra__cb': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
   'teostra__chest': [
     { id: 'artful_dodger', thresholds: [[8, 1]
     ] },
     { id: 'critical_eye', thresholds: [[6, 1]
     ] },
     { id: 'teostra_bless', thresholds: [[6, 1]
+    ] }
+  ],
+  'teostra__gs': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
+  'teostra__hbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
     ] }
   ],
   'teostra__head': [
@@ -2266,12 +4869,54 @@ const GEAR_SKILLS = {
     { id: 'teostra_bless', thresholds: [[6, 1]
     ] }
   ],
+  'teostra__hh': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
+  'teostra__hmr': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
+  'teostra__lbg': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
   'teostra__legs': [
     { id: 'critical_boost', thresholds: [[6, 1]
     ] },
     { id: 'evade_extender', thresholds: [[8, 1]
     ] },
     { id: 'teostra_bless', thresholds: [[6, 1]
+    ] }
+  ],
+  'teostra__lnc': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
+  'teostra__ls': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
+  'teostra__sa': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
+    ] }
+  ],
+  'teostra__sns': [
+    { id: 'elder_dragon_resonance', thresholds: [[6, 1]
+    ] },
+    { id: 'heroics', thresholds: [[8, 2]
     ] }
   ],
   'teostra__waist': [
@@ -2286,10 +4931,34 @@ const GEAR_SKILLS = {
     { id: 'earplugs', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'tigrex__bow': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__cb': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
   'tigrex__chest': [
     { id: 'guts', thresholds: [[5, 1]
     ] },
     { id: 'heroics', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'tigrex__db': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__gl': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__gs': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__hbg': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
     ] }
   ],
   'tigrex__head': [
@@ -2298,10 +4967,42 @@ const GEAR_SKILLS = {
     { id: 'concentration', thresholds: [[6, 1]
     ] }
   ],
+  'tigrex__hh': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__hmr': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__ig': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__lbg': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
   'tigrex__legs': [
     { id: 'lock_on', thresholds: [[5, 1]
     ] },
     { id: 'partbreaker', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'tigrex__lnc': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__ls': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__sa': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
+    ] }
+  ],
+  'tigrex__sns': [
+    { id: 'brutal_strike', thresholds: [[8, 1]
     ] }
   ],
   'tigrex__waist': [
@@ -2314,10 +5015,34 @@ const GEAR_SKILLS = {
     { id: 'evade_extender', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'tobi_kadachi__bow': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__cb': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'tobi_kadachi__chest': [
     { id: 'evade_extender', thresholds: [[2, 1]
     ] },
     { id: 'thunder_attack', thresholds: [[4, 1]
+    ] }
+  ],
+  'tobi_kadachi__db': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__gl': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__gs': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__hbg': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'tobi_kadachi__head': [
@@ -2326,10 +5051,42 @@ const GEAR_SKILLS = {
     { id: 'reload_speed', thresholds: [[2, 1]
     ] }
   ],
+  'tobi_kadachi__hh': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__hmr': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__ig': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__lbg': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'tobi_kadachi__legs': [
     { id: 'artful_dodger', thresholds: [[2, 1]
     ] },
     { id: 'thunder_resistance', thresholds: [[4, 1]
+    ] }
+  ],
+  'tobi_kadachi__lnc': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__ls': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__sa': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'tobi_kadachi__sns': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'tobi_kadachi__waist': [
@@ -2346,14 +5103,30 @@ const GEAR_SKILLS = {
     { id: 'artful_dodger', thresholds: [[4, 1]
     ] }
   ],
+  'tzitzi_ya_ku__db': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
+  'tzitzi_ya_ku__hbg': [
+    { id: 'guard', thresholds: [[8, 1]
+    ] }
+  ],
   'tzitzi_ya_ku__head': [
     { id: 'evade_extender', thresholds: [[4, 1]
     ] },
     { id: 'thunder_attack', thresholds: [[2, 1], [6, 2]
     ] }
   ],
+  'tzitzi_ya_ku__ig': [
+    { id: 'lock_on', thresholds: [[8, 1]
+    ] }
+  ],
   'tzitzi_ya_ku__legs': [
     { id: 'fortify', thresholds: [[2, 1], [4, 2]
+    ] }
+  ],
+  'tzitzi_ya_ku__ls': [
+    { id: 'lock_on', thresholds: [[8, 1]
     ] }
   ],
   'tzitzi_ya_ku__waist': [
@@ -2370,8 +5143,38 @@ const GEAR_SKILLS = {
     { id: 'pursuit_paralysis', thresholds: [[5, 1]
     ] }
   ],
+  'vipertobikadachi__bow': [
+    { id: 'burst', thresholds: [[5, 1]
+    ] },
+    { id: 'burst_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'vipertobikadachi__cb': [
+    { id: 'burst', thresholds: [[5, 1]
+    ] },
+    { id: 'burst_secret', thresholds: [[8, 1]
+    ] }
+  ],
   'vipertobikadachi__chest': [
     { id: 'power_burst', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'vipertobikadachi__db': [
+    { id: 'burst', thresholds: [[5, 1]
+    ] },
+    { id: 'burst_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'vipertobikadachi__gl': [
+    { id: 'burst', thresholds: [[5, 1]
+    ] },
+    { id: 'burst_secret', thresholds: [[8, 1]
+    ] }
+  ],
+  'vipertobikadachi__hbg': [
+    { id: 'burst', thresholds: [[5, 1]
+    ] },
+    { id: 'burst_secret', thresholds: [[8, 1]
     ] }
   ],
   'vipertobikadachi__head': [
@@ -2382,10 +5185,22 @@ const GEAR_SKILLS = {
     { id: 'power_burst', thresholds: [[8, 1]
     ] }
   ],
+  'vipertobikadachi__ig': [
+    { id: 'burst', thresholds: [[5, 1]
+    ] },
+    { id: 'burst_secret', thresholds: [[8, 1]
+    ] }
+  ],
   'vipertobikadachi__legs': [
     { id: 'burst_secret', thresholds: [[5, 1]
     ] },
     { id: 'pursuit_poison', thresholds: [[5, 1], [8, 2]
+    ] }
+  ],
+  'vipertobikadachi__ls': [
+    { id: 'burst', thresholds: [[5, 1]
+    ] },
+    { id: 'burst_secret', thresholds: [[8, 1]
     ] }
   ],
   'vipertobikadachi__waist': [
@@ -2398,8 +5213,20 @@ const GEAR_SKILLS = {
     { id: 'morph_boost', thresholds: [[3, 1], [6, 2]
     ] }
   ],
+  'volvidon__cb': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'volvidon__chest': [
     { id: 'paralysis_attack', thresholds: [[3, 1], [4, 2]
+    ] }
+  ],
+  'volvidon__gl': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'volvidon__hbg': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'volvidon__head': [
@@ -2408,8 +5235,20 @@ const GEAR_SKILLS = {
     { id: 'power_prolonger', thresholds: [[4, 1]
     ] }
   ],
+  'volvidon__hmr': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
   'volvidon__legs': [
     { id: 'paralysis_resistance', thresholds: [[3, 1], [4, 2], [6, 3]
+    ] }
+  ],
+  'volvidon__lnc': [
+    { id: 'evade_extender', thresholds: [[8, 1]
+    ] }
+  ],
+  'volvidon__sa': [
+    { id: 'evade_extender', thresholds: [[8, 1]
     ] }
   ],
   'volvidon__waist': [
@@ -2422,10 +5261,34 @@ const GEAR_SKILLS = {
     { id: 'thunder_attack', thresholds: [[5, 1], [6, 2]
     ] }
   ],
+  'zinogre__bow': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__cb': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
   'zinogre__chest': [
     { id: 'perfect_evade_sp_charge', thresholds: [[5, 1], [6, 2]
     ] },
     { id: 'thunder_resistance', thresholds: [[5, 1]
+    ] }
+  ],
+  'zinogre__db': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__gl': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__gs': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__hbg': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
     ] }
   ],
   'zinogre__head': [
@@ -2434,10 +5297,42 @@ const GEAR_SKILLS = {
     { id: 'perfect_evade_sp_charge', thresholds: [[5, 1]
     ] }
   ],
+  'zinogre__hh': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__hmr': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__ig': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__lbg': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
   'zinogre__legs': [
     { id: 'burst', thresholds: [[5, 1]
     ] },
     { id: 'thunder_attack', thresholds: [[6, 1]
+    ] }
+  ],
+  'zinogre__lnc': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__ls': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__sa': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
+    ] }
+  ],
+  'zinogre__sns': [
+    { id: 'artful_dodger', thresholds: [[8, 1]
     ] }
   ],
   'zinogre__waist': [
