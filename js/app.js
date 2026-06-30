@@ -254,7 +254,7 @@ function handleAction(action, id, mat) {
     } else {
       const monster = MONSTER_BY_ID[id];
       const armor   = ARMOR.find(a => a.monsterId === id && a.slot === UI.buildPicker.slotKey);
-      if (armor && monster) UI.editingBuild.slots[UI.buildPicker.slotKey] = { equipId: armor.id, targetGrade: maxStep(monster) };
+      if (armor && monster) UI.editingBuild.slots[UI.buildPicker.slotKey] = { equipId: armor.id, targetGrade: AppState.getProgress(armor.id).targetGrade || maxStep(monster) };
       UI.buildPicker = null;
       renderTab();
     }
@@ -264,7 +264,7 @@ function handleAction(action, id, mat) {
     const mid    = UI.buildPicker.monsterId;
     const monster = MONSTER_BY_ID[mid];
     const weapon  = WEAPONS.find(w => w.monsterId === mid && w.type === id);
-    if (weapon && monster) UI.editingBuild.slots.weapon = { equipId: weapon.id, targetGrade: maxStep(monster) };
+    if (weapon && monster) UI.editingBuild.slots.weapon = { equipId: weapon.id, targetGrade: AppState.getProgress(weapon.id).targetGrade || maxStep(monster) };
     UI.buildPicker = null;
     renderTab();
   }
