@@ -420,6 +420,8 @@ const MONSTERS = [
     exclusive: ["none", "none", {"weapon": "bone_purole", "armor": "hide_purple"}, "blood_red", "tail_purple", "claw_purple"] }
 ];
 
+MONSTERS.sort((a, b) => a.name.localeCompare(b.name));
+
 // ─── Derived datasets (built once at load) ────────────────────────────────────
 
 function buildWeapons() {

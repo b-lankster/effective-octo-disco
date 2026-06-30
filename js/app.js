@@ -47,6 +47,56 @@ function bindMain() {
       AppState.setActiveBuild(e.target.value || null);
       renderTab();
     }
+    if (e.target.classList.contains('grade-sel') && !e.target.classList.contains('build-grade-sel')) {
+      const { selKind, selPart, id } = e.target.dataset;
+      const monster = getMonsterForEquip(id);
+      if (!monster) return;
+      const prog = AppState.getProgress(id);
+      const curStep = selKind === 'current' ? prog.currentGrade : prog.targetGrade;
+      if (selPart === 'grade') {
+        const g = parseInt(e.target.value);
+        if (g === 0) {
+          if (selKind === 'current') AppState.setCurrentGrade(id, 0);
+          else AppState.setTargetGrade(id, 0);
+        } else {
+          const lvl = curStep > 0 ? levelFromStep(curStep) : 1;
+          const step = Math.min(maxStep(monster), gradeToStep(g, lvl, monster));
+          if (selKind === 'current') AppState.setCurrentGrade(id, step);
+          else AppState.setTargetGrade(id, step);
+        }
+      } else {
+        const lvl = parseInt(e.target.value);
+        const g   = curStep > 0 ? gradeFromStep(curStep, monster) : monster.stars;
+        const step = Math.min(maxStep(monster), gradeToStep(g, lvl, monster));
+        if (selKind === 'current') AppState.setCurrentGrade(id, step);
+        else AppState.setTargetGrade(id, step);
+      }
+      renderTab();
+    }
+    if (e.target.classList.contains('build-grade-sel') && UI.editingBuild) {
+      const { slotKey, selPart } = e.target.dataset;
+      const slot    = UI.editingBuild.slots[slotKey];
+      if (!slot?.equipId) return;
+      const equip   = WEAPON_BY_ID[slot.equipId] ?? ARMOR_BY_ID[slot.equipId];
+      const monster = equip ? MONSTER_BY_ID[equip.monsterId] : null;
+      if (!monster) return;
+      const current = AppState.getProgress(slot.equipId).currentGrade;
+      if (selPart === 'grade') {
+        const g = parseInt(e.target.value);
+        if (g === 0) {
+          slot.targetGrade = 0;
+        } else {
+          const lvl = slot.targetGrade > 0 ? levelFromStep(slot.targetGrade) : 1;
+          slot.targetGrade = Math.min(maxStep(monster), gradeToStep(g, lvl, monster));
+        }
+      } else {
+        const lvl = parseInt(e.target.value);
+        const g   = slot.targetGrade > 0 ? gradeFromStep(slot.targetGrade, monster) : monster.stars;
+        slot.targetGrade = Math.min(maxStep(monster), gradeToStep(g, lvl, monster));
+      }
+      slot.targetGrade = Math.max(slot.targetGrade, current);
+      renderTab();
+    }
   });
 
   el.addEventListener('click', e => {
@@ -279,6 +329,46 @@ function getMonsterForEquip(equipId) {
   const equip = WEAPON_BY_ID[equipId] ?? ARMOR_BY_ID[equipId];
   return equip ? MONSTER_BY_ID[equip.monsterId] : null;
 }
+function gradeFromStep(step, monster) {
+  if (step <= 0) return 0;
+  return monster.stars + Math.floor((step - 1) / 5);
+}
+function levelFromStep(step) {
+  if (step <= 0) return 1;
+  return ((step - 1) % 5) + 1;
+}
+function gradeToStep(grade, level, monster) {
+  if (grade <= 0) return 0;
+  return (grade - monster.stars) * 5 + level;
+}
+function gradeSelects(monster, step, id, kind) {
+  const grade = step > 0 ? gradeFromStep(step, monster) : 0;
+  const level = step > 0 ? levelFromStep(step) : 1;
+  const gradeOpts = `<option value="0" ${grade === 0 ? 'selected' : ''}>—</option>` +
+    Array.from({length: 11 - monster.stars}, (_, i) => {
+      const g = monster.stars + i;
+      return `<option value="${g}" ${grade === g ? 'selected' : ''}>G${g}</option>`;
+    }).join('');
+  const levelOpts = [1,2,3,4,5].map(l =>
+    `<option value="${l}" ${level === l ? 'selected' : ''}>L${l}</option>`
+  ).join('');
+  return `<select class="grade-sel" data-sel-kind="${kind}" data-sel-part="grade" data-id="${id}">${gradeOpts}</select>` +
+    `<select class="grade-sel" data-sel-kind="${kind}" data-sel-part="level" data-id="${id}"${grade === 0 ? ' disabled' : ''}>${levelOpts}</select>`;
+}
+function buildSlotGradeSelects(monster, step, slotKey) {
+  const grade = step > 0 ? gradeFromStep(step, monster) : 0;
+  const level = step > 0 ? levelFromStep(step) : 1;
+  const gradeOpts = `<option value="0" ${grade === 0 ? 'selected' : ''}>—</option>` +
+    Array.from({length: 11 - monster.stars}, (_, i) => {
+      const g = monster.stars + i;
+      return `<option value="${g}" ${grade === g ? 'selected' : ''}>G${g}</option>`;
+    }).join('');
+  const levelOpts = [1,2,3,4,5].map(l =>
+    `<option value="${l}" ${level === l ? 'selected' : ''}>L${l}</option>`
+  ).join('');
+  return `<select class="grade-sel build-grade-sel" data-slot-key="${slotKey}" data-sel-part="grade">${gradeOpts}</select>` +
+    `<select class="grade-sel build-grade-sel" data-slot-key="${slotKey}" data-sel-part="level"${grade === 0 ? ' disabled' : ''}>${levelOpts}</select>`;
+}
 
 // ─── GEAR TAB ─────────────────────────────────────────────────────────────────
 
@@ -411,15 +501,11 @@ function renderGearItem(item, monster) {
         <div class="grade-editor${expanded ? '' : ' collapsed'}" data-expand="${item.id}">
           <div class="grade-row">
             <label>Current</label>
-            <button class="grade-btn" data-action="current-dec" data-id="${item.id}">−</button>
-            <span class="grade-val">${stepLabel(monster, prog.currentGrade)}</span>
-            <button class="grade-btn" data-action="current-inc" data-id="${item.id}">+</button>
+            ${gradeSelects(monster, prog.currentGrade, item.id, 'current')}
           </div>
           <div class="grade-row">
             <label>Target</label>
-            <button class="grade-btn" data-action="target-dec" data-id="${item.id}">−</button>
-            <span class="grade-val">${stepLabel(monster, prog.targetGrade)}</span>
-            <button class="grade-btn" data-action="target-inc" data-id="${item.id}">+</button>
+            ${gradeSelects(monster, prog.targetGrade, item.id, 'target')}
           </div>
         </div>
         <button class="expand-btn" data-action="expand" data-id="${item.id}">
@@ -752,9 +838,7 @@ function renderBuildSlotCard(slotKey, label, slot) {
         </div>
         <div class="grade-row build-slot-grade-row">
           <label>Target</label>
-          <button class="grade-btn" data-action="build-slot-target-dec" data-id="${slotKey}">−</button>
-          <span class="grade-val">${stepLabel(monster, slot.targetGrade)}</span>
-          <button class="grade-btn" data-action="build-slot-target-inc" data-id="${slotKey}">+</button>
+          ${buildSlotGradeSelects(monster, slot.targetGrade, slotKey)}
           ${done
             ? '<span class="done-pill">✓</span>'
             : gradeBar(current, slot.targetGrade, monster)}
@@ -805,6 +889,7 @@ function renderBuildPicker() {
   }
 
   return `
+    <div class="picker-backdrop" data-action="build-picker-cancel"></div>
     <div class="picker-overlay">
       <div class="picker-header">
         <span>Pick ${SLOT_LABEL[slotKey]}</span>

@@ -127,8 +127,10 @@ const AppState = {
       for (const slot of Object.values(build.slots)) {
         if (!slot.equipId) continue;
         const p = this.getProgress(slot.equipId);
-        if (slot.targetGrade > p.currentGrade && !p.tracked) {
-          this.progress[slot.equipId] = { ...p, tracked: true };
+        const shouldTrack = slot.targetGrade > p.currentGrade;
+        const newTarget = Math.max(p.targetGrade, slot.targetGrade);
+        if ((shouldTrack && !p.tracked) || newTarget > p.targetGrade) {
+          this.progress[slot.equipId] = { ...p, tracked: p.tracked || shouldTrack, targetGrade: newTarget };
         }
       }
     }
