@@ -71,6 +71,12 @@ function bindMain() {
         if (selKind === 'current') AppState.setCurrentGrade(id, step);
         else AppState.setTargetGrade(id, step);
       }
+      if (selKind === 'current' && UI.editingBuild) {
+        const newCurrent = AppState.getProgress(id).currentGrade;
+        for (const slot of Object.values(UI.editingBuild.slots)) {
+          if (slot.equipId === id) slot.targetGrade = Math.max(slot.targetGrade, newCurrent);
+        }
+      }
       renderTab();
     }
     if (e.target.classList.contains('build-grade-sel') && UI.editingBuild) {
@@ -329,6 +335,33 @@ function getMonsterForEquip(equipId) {
   const equip = WEAPON_BY_ID[equipId] ?? ARMOR_BY_ID[equipId];
   return equip ? MONSTER_BY_ID[equip.monsterId] : null;
 }
+function skillLevelForGrade(thresholds, grade) {
+  let level = 0;
+  for (const [g, l] of thresholds) {
+    if (grade >= g) level = l; else break;
+  }
+  return level;
+}
+
+function buildSkillTotals(build) {
+  const current = {}, target = {};
+  for (const slot of Object.values(build.slots)) {
+    if (!slot.equipId) continue;
+    const skills = GEAR_SKILLS[slot.equipId];
+    if (!skills) continue;
+    const equip   = WEAPON_BY_ID[slot.equipId] ?? ARMOR_BY_ID[slot.equipId];
+    const monster = equip ? MONSTER_BY_ID[equip.monsterId] : null;
+    if (!monster) continue;
+    const curGrade = gradeFromStep(AppState.getProgress(slot.equipId).currentGrade, monster);
+    const tgtGrade = gradeFromStep(slot.targetGrade, monster);
+    for (const { id, thresholds } of skills) {
+      current[id] = (current[id] || 0) + skillLevelForGrade(thresholds, curGrade);
+      target[id]  = (target[id]  || 0) + skillLevelForGrade(thresholds, tgtGrade);
+    }
+  }
+  return { current, target };
+}
+
 function gradeFromStep(step, monster) {
   if (step <= 0) return 0;
   return monster.stars + Math.floor((step - 1) / 5);
@@ -722,6 +755,7 @@ function renderBuildsTab(el) {
 
 function renderBuildList() {
   const builds = AppState.builds;
+  const activeBuild = AppState.activeBuildId ? AppState.getBuild(AppState.activeBuildId) : null;
   return `
     <div class="tab-header">
       <h2>Builds</h2>
@@ -731,7 +765,48 @@ function renderBuildList() {
       ? '<p class="empty-msg">No builds yet.<br>Tap <strong>+ New</strong> to create your first loadout.</p>'
       : `<div class="build-list">${builds.map(renderBuildCard).join('')}</div>`
     }
+    ${activeBuild ? renderSkillProgression(activeBuild) : ''}
   `;
+}
+
+function renderSkillProgression(build) {
+  const { current, target } = buildSkillTotals(build);
+  const ids = [...new Set([...Object.keys(current), ...Object.keys(target)])]
+    .filter(id => (target[id] || 0) > 0 || (current[id] || 0) > 0);
+  if (ids.length === 0) return '';
+
+  ids.sort((a, b) => {
+    const gainDiff = ((target[b] || 0) - (current[b] || 0)) - ((target[a] || 0) - (current[a] || 0));
+    return gainDiff !== 0 ? gainDiff : (target[b] || 0) - (target[a] || 0);
+  });
+
+  const rows = ids.map(id => {
+    const cur  = current[id] || 0;
+    const tgt  = target[id]  || 0;
+    const name = SKILL_NAMES[id] || id.replace(/_/g, ' ');
+    const bars = Array.from({ length: tgt }, (_, i) => {
+      const cls = i < cur ? 'filled' : 'pending';
+      return `<span class="skill-bar ${cls}"></span>`;
+    }).join('');
+    return `
+      <div class="skill-prog-row">
+        <span class="skill-prog-name">${name}</span>
+        <div class="skill-prog-bars">${bars}</div>
+        <div class="skill-prog-levels">
+          <span class="skill-cur${cur === 0 ? ' zero' : ''}">Lv.${cur}</span>
+          ${tgt > cur ? `<span class="skill-arrow">→</span><span class="skill-tgt">Lv.${tgt}</span>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="skill-progression">
+      <div class="skill-prog-header">
+        <span>Skill Progression</span>
+        <span class="skill-prog-sub">${build.name}</span>
+      </div>
+      <div class="skill-prog-list">${rows}</div>
+    </div>`;
 }
 
 function renderBuildCard(build) {
@@ -835,6 +910,10 @@ function renderBuildSlotCard(slotKey, label, slot) {
         <div class="build-slot-piece-info" style="border-left:3px solid ${monster.color}">
           <span class="build-slot-piece-name">${equip.name}</span>
           <span class="build-slot-monster" style="color:${monster.color}">${monster.name}</span>
+        </div>
+        <div class="grade-row">
+          <label>Current</label>
+          ${gradeSelects(monster, current, slot.equipId, 'current')}
         </div>
         <div class="grade-row build-slot-grade-row">
           <label>Target</label>

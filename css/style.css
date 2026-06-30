@@ -857,3 +857,70 @@ a { color: var(--accent); }
   display: block;
   text-align: left;
 }
+
+/* ── Skill Progression ────────────────────────────────────────────────────── */
+.skill-progression {
+  margin: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.skill-prog-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+  font-weight: 700;
+}
+.skill-prog-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-dim);
+}
+
+.skill-prog-list { padding: 2px 0; }
+
+.skill-prog-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.skill-prog-row:last-child { border-bottom: none; }
+
+.skill-prog-name {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+}
+
+.skill-prog-bars { display: flex; gap: 3px; }
+
+.skill-bar {
+  width: 16px;
+  height: 10px;
+  border-radius: 2px;
+}
+.skill-bar.filled  { background: var(--accent); }
+.skill-bar.pending { background: transparent; border: 1px dashed var(--accent); opacity: 0.6; }
+
+.skill-prog-levels {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 72px;
+  justify-content: flex-end;
+}
+.skill-cur       { color: var(--accent); }
+.skill-cur.zero  { color: var(--text-faint); }
+.skill-arrow     { color: var(--text-dim); font-weight: 400; }
+.skill-tgt       { color: #66bb6a; }
