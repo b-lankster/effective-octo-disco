@@ -34,7 +34,7 @@ const SKILL_NAMES = {
   'dragon_attack': 'Dragon Attack',
   'dragon_attack_boost_secret': 'Advanced Dragon Attack',
   'earplugs': 'Earplugs',
-  'elder_dragon_resonance': 'Hunter's Unity',
+  'elder_dragon_resonance': "Hunter's Unity",
   'ending_shot': 'Final Shot',
   'enhancement_normal_ammo': 'Normal/Element Ammo Boost',
   'enhancement_slicing_ammo': 'Slicing Ammo Boost',

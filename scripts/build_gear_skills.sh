@@ -40,7 +40,7 @@ echo "  Found ${#SKILL_IDS[@]} unique skills"
       | sed 's/<title>//' | sed 's/ – Monster Hunter Now<\/title>//')
     if [ -n "$name" ]; then
       [ $first -eq 0 ] && echo ","
-      printf "  '%s': '%s'" "$skill_id" "$name"
+      printf "  '%s': \"%s\"" "$skill_id" "$name"
       first=0
     else
       echo "  // WARNING: no name found for $skill_id" >&2
