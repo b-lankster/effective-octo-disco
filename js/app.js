@@ -5,8 +5,10 @@
 const UI = {
   activeTab:     'gear',
   gearFilter:    { monsterId: null, type: null, trackedOnly: false, isArmor: null },
-  expandedGear:  new Set(),   // equipIds with grade controls open
-  expandedMats:  new Set(),   // monster ids with mat list open in materials tab
+  expandedGear:  new Set(),
+  expandedMats:  new Set(),
+  editingBuild:  null,   // build object being created/edited
+  buildPicker:   null,   // { slotKey, step: 'monster'|'type', monsterId }
 };
 
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
@@ -39,6 +41,10 @@ function bindMain() {
     }
     if (e.target.id === 'filter-tracked') {
       UI.gearFilter.trackedOnly = e.target.checked;
+      renderTab();
+    }
+    if (e.target.id === 'build-filter-select') {
+      AppState.setActiveBuild(e.target.value || null);
       renderTab();
     }
   });
@@ -124,11 +130,109 @@ function handleAction(action, id, mat) {
     AppState.setInventory(mat, AppState.getInventory(mat) - 1);
     renderTab();
   }
+
+  // ── build actions ────────────────────────────────────────────────────────────
+  if (action === 'build-new') {
+    UI.editingBuild = {
+      id: String(Date.now()),
+      name: 'New Build',
+      slots: Object.fromEntries(['weapon','head','chest','arms','waist','legs'].map(k => [k, { equipId: null, targetGrade: 0 }])),
+      isNew: true,
+    };
+    UI.activeTab = 'builds';
+    renderNav();
+    renderTab();
+  }
+  if (action === 'build-edit') {
+    const b = AppState.getBuild(id);
+    if (b) { UI.editingBuild = JSON.parse(JSON.stringify(b)); renderTab(); }
+  }
+  if (action === 'build-delete') {
+    const b = AppState.getBuild(id);
+    if (b && confirm(`Delete "${b.name}"?`)) { AppState.deleteBuild(id); renderTab(); }
+  }
+  if (action === 'build-activate') {
+    AppState.setActiveBuild(AppState.activeBuildId === id ? null : id);
+    renderTab();
+  }
+  if (action === 'build-save') {
+    if (UI.editingBuild) {
+      const nameInput = document.getElementById('build-name-input');
+      if (nameInput) UI.editingBuild.name = nameInput.value.trim() || 'Untitled Build';
+      const isNew = UI.editingBuild.isNew;
+      delete UI.editingBuild.isNew;
+      AppState.saveBuild(UI.editingBuild);
+      if (isNew) AppState.setActiveBuild(UI.editingBuild.id);
+      UI.editingBuild = null;
+      renderTab();
+    }
+  }
+  if (action === 'build-cancel') {
+    UI.editingBuild = null;
+    UI.buildPicker  = null;
+    renderTab();
+  }
+  if (action === 'build-slot-tap') {
+    UI.buildPicker = { slotKey: id, step: 'monster', monsterId: null };
+    renderTab();
+  }
+  if (action === 'build-slot-clear') {
+    if (UI.editingBuild) {
+      UI.editingBuild.slots[id] = { equipId: null, targetGrade: 0 };
+      renderTab();
+    }
+  }
+  if (action === 'build-picker-cancel') {
+    UI.buildPicker = null;
+    renderTab();
+  }
+  if (action === 'build-picker-back') {
+    if (UI.buildPicker) { UI.buildPicker.step = 'monster'; UI.buildPicker.monsterId = null; renderTab(); }
+  }
+  if (action === 'build-picker-monster') {
+    if (!UI.buildPicker || !UI.editingBuild) return;
+    if (UI.buildPicker.slotKey === 'weapon') {
+      UI.buildPicker.step = 'type';
+      UI.buildPicker.monsterId = id;
+      renderTab();
+    } else {
+      const monster = MONSTER_BY_ID[id];
+      const armor   = ARMOR.find(a => a.monsterId === id && a.slot === UI.buildPicker.slotKey);
+      if (armor && monster) UI.editingBuild.slots[UI.buildPicker.slotKey] = { equipId: armor.id, targetGrade: maxStep(monster) };
+      UI.buildPicker = null;
+      renderTab();
+    }
+  }
+  if (action === 'build-picker-type') {
+    if (!UI.buildPicker || !UI.editingBuild) return;
+    const mid    = UI.buildPicker.monsterId;
+    const monster = MONSTER_BY_ID[mid];
+    const weapon  = WEAPONS.find(w => w.monsterId === mid && w.type === id);
+    if (weapon && monster) UI.editingBuild.slots.weapon = { equipId: weapon.id, targetGrade: maxStep(monster) };
+    UI.buildPicker = null;
+    renderTab();
+  }
+  if (action === 'build-slot-target-inc') {
+    if (!UI.editingBuild) return;
+    const slot   = UI.editingBuild.slots[id];
+    if (!slot?.equipId) return;
+    const equip   = WEAPON_BY_ID[slot.equipId] ?? ARMOR_BY_ID[slot.equipId];
+    const monster = equip ? MONSTER_BY_ID[equip.monsterId] : null;
+    if (monster) { slot.targetGrade = Math.min(maxStep(monster), slot.targetGrade + 1); renderTab(); }
+  }
+  if (action === 'build-slot-target-dec') {
+    if (!UI.editingBuild) return;
+    const slot    = UI.editingBuild.slots[id];
+    if (!slot?.equipId) return;
+    const current = AppState.getProgress(slot.equipId).currentGrade;
+    slot.targetGrade = Math.max(current, slot.targetGrade - 1);
+    renderTab();
+  }
 }
 
 function renderNav() {
-  const tabs = ['gear', 'materials', 'priority'];
-  const labels = { gear: '⚔ Gear', materials: '💎 Materials', priority: '🎯 Priority' };
+  const tabs   = ['gear', 'materials', 'priority', 'builds'];
+  const labels = { gear: '⚔ Gear', materials: '💎 Mats', priority: '🎯 Priority', builds: '🏗 Builds' };
   document.getElementById('nav').innerHTML = tabs.map(t => `
     <button class="nav-btn${UI.activeTab === t ? ' active' : ''}" data-tab="${t}">
       ${labels[t]}
@@ -139,9 +243,10 @@ function renderNav() {
 function renderTab(resetScroll = false) {
   const el = document.getElementById('main');
   const savedScroll = resetScroll ? 0 : el.scrollTop;
-  if (UI.activeTab === 'gear')      renderGearTab(el);
+  if (UI.activeTab === 'gear')           renderGearTab(el);
   else if (UI.activeTab === 'materials') renderMaterialsTab(el);
-  else                              renderPriorityTab(el);
+  else if (UI.activeTab === 'priority')  renderPriorityTab(el);
+  else                                   renderBuildsTab(el);
   el.scrollTop = savedScroll;
 }
 
@@ -329,24 +434,24 @@ function renderGearItem(item, monster) {
 // ─── MATERIALS TAB ────────────────────────────────────────────────────────────
 
 function renderMaterialsTab(el) {
-  const needs = calcAllNeeds();
+  const activeBuild = AppState.activeBuildId ? AppState.getBuild(AppState.activeBuildId) : null;
+  const needs = activeBuild ? calcBuildNeeds(activeBuild) : calcAllNeeds();
 
   if (needs.length === 0) {
     el.innerHTML = `
       <div class="tab-header"><h2>Materials Needed</h2></div>
+      ${renderBuildFilterBar()}
       <p class="empty-msg">No tracked gear with remaining grades.<br>
         Head to <strong>Gear</strong> and start tracking.</p>`;
     return;
   }
 
-  // Group by monster
   const byMonster = {};
   for (const n of needs) {
     (byMonster[n.monster.id] = byMonster[n.monster.id] || { monster: n.monster, items: [] })
       .items.push(n);
   }
   const monsterOrder = MONSTERS.filter(m => byMonster[m.id]).map(m => m.id);
-
   const totalShortage = needs.reduce((s, n) => s + n.shortage, 0);
 
   el.innerHTML = `
@@ -354,12 +459,12 @@ function renderMaterialsTab(el) {
       <h2>Materials Needed</h2>
       <span class="tracked-pill">${totalShortage} items short</span>
     </div>
+    ${renderBuildFilterBar()}
     <p class="disclaimer">Material costs from <a href="https://mhnow.me/material?lang=en" target="_blank">mhnow.me</a></p>
     <div id="mat-list">
       ${monsterOrder.map(mid => renderMonsterMaterials(byMonster[mid])).join('')}
     </div>
   `;
-
 }
 
 function renderMonsterMaterials({ monster, items }) {
@@ -411,11 +516,13 @@ function renderMaterialRow(n) {
 // ─── PRIORITY TAB ─────────────────────────────────────────────────────────────
 
 function renderPriorityTab(el) {
-  const ranked = calcMonsterPriority();
+  const activeBuild = AppState.activeBuildId ? AppState.getBuild(AppState.activeBuildId) : null;
+  const ranked = activeBuild ? calcBuildPriority(activeBuild) : calcMonsterPriority();
 
   if (ranked.length === 0) {
     el.innerHTML = `
       <div class="tab-header"><h2>Hunt Priority</h2></div>
+      ${renderBuildFilterBar()}
       <p class="empty-msg">Nothing tracked yet.<br>
         Head to <strong>Gear</strong> and flag what you're working on.</p>`;
     return;
@@ -428,41 +535,52 @@ function renderPriorityTab(el) {
       <h2>Hunt Priority</h2>
       <span class="tracked-pill">${ranked.length} monsters</span>
     </div>
+    ${renderBuildFilterBar()}
     <p class="priority-note">Ranked by how much you still need from each monster,
       weighted by material rarity and whether it's event-only.</p>
     <div class="priority-list">
-      ${ranked.map((entry, i) => renderPriorityCard(entry, i + 1, maxScore)).join('')}
+      ${ranked.map((entry, i) => renderPriorityCard(entry, i + 1, maxScore, activeBuild)).join('')}
     </div>
   `;
 }
 
-function renderPriorityCard({ monster, score, pieces, stepsTotal }, rank, maxScore) {
+function renderPriorityCard({ monster, score, pieces, stepsTotal }, rank, maxScore, activeBuild) {
   const pct = Math.round((score / maxScore) * 100);
   const urgencyClass = pct >= 75 ? 'urgency-high' : pct >= 40 ? 'urgency-mid' : 'urgency-low';
 
-  // Break down tracked gear for this monster
-  const monsterEquip = [
-    ...WEAPONS.filter(w => w.monsterId === monster.id),
-    ...ARMOR.filter(a => a.monsterId === monster.id),
-  ].filter(e => {
-    const p = AppState.getProgress(e.id);
-    return p.tracked && p.targetGrade > p.currentGrade;
-  });
-
-  const gearRows = monsterEquip.map(e => {
-    const p    = AppState.getProgress(e.id);
-    const type = e.type
-      ? `<span class="type-badge">${WEAPON_TYPES[e.type].short}</span>`
-      : `<span class="type-badge armor-badge">${ARMOR_SLOT_NAMES[e.slot]}</span>`;
-    const cur = stepLabel(monster, p.currentGrade);
-    const tgt = stepLabel(monster, p.targetGrade);
-    return `
-      <div class="priority-gear-row">
-        ${type}
-        <span class="gear-name">${e.name}</span>
-        <span class="grade-label">${cur}→${tgt}</span>
-      </div>`;
-  }).join('');
+  let gearRows;
+  if (activeBuild) {
+    gearRows = ['weapon','head','chest','arms','waist','legs']
+      .filter(sk => {
+        const slot  = activeBuild.slots[sk];
+        if (!slot?.equipId) return false;
+        const equip = WEAPON_BY_ID[slot.equipId] ?? ARMOR_BY_ID[slot.equipId];
+        return equip?.monsterId === monster.id && slot.targetGrade > AppState.getProgress(slot.equipId).currentGrade;
+      })
+      .map(sk => {
+        const slot    = activeBuild.slots[sk];
+        const isWep   = sk === 'weapon';
+        const equip   = isWep ? WEAPON_BY_ID[slot.equipId] : ARMOR_BY_ID[slot.equipId];
+        const type    = isWep
+          ? `<span class="type-badge">${WEAPON_TYPES[equip.type].short}</span>`
+          : `<span class="type-badge armor-badge">${ARMOR_SLOT_NAMES[equip.slot]}</span>`;
+        const cur = stepLabel(monster, AppState.getProgress(slot.equipId).currentGrade);
+        const tgt = stepLabel(monster, slot.targetGrade);
+        return `<div class="priority-gear-row">${type}<span class="gear-name">${equip.name}</span><span class="grade-label">${cur}→${tgt}</span></div>`;
+      }).join('');
+  } else {
+    const monsterEquip = [
+      ...WEAPONS.filter(w => w.monsterId === monster.id),
+      ...ARMOR.filter(a => a.monsterId === monster.id),
+    ].filter(e => { const p = AppState.getProgress(e.id); return p.tracked && p.targetGrade > p.currentGrade; });
+    gearRows = monsterEquip.map(e => {
+      const p    = AppState.getProgress(e.id);
+      const type = e.type
+        ? `<span class="type-badge">${WEAPON_TYPES[e.type].short}</span>`
+        : `<span class="type-badge armor-badge">${ARMOR_SLOT_NAMES[e.slot]}</span>`;
+      return `<div class="priority-gear-row">${type}<span class="gear-name">${e.name}</span><span class="grade-label">${stepLabel(monster, p.currentGrade)}→${stepLabel(monster, p.targetGrade)}</span></div>`;
+    }).join('');
+  }
 
   return `
     <div class="priority-card ${urgencyClass}">
@@ -487,4 +605,211 @@ function renderPriorityCard({ monster, score, pieces, stepsTotal }, rank, maxSco
       </div>
     </div>
   `;
+}
+
+
+// ─── BUILD FILTER BAR ─────────────────────────────────────────────────────────
+
+function renderBuildFilterBar() {
+  if (AppState.builds.length === 0) return '';
+  const opts = AppState.builds.map(b =>
+    `<option value="${b.id}"${AppState.activeBuildId === b.id ? ' selected' : ''}>${b.name}</option>`
+  ).join('');
+  return `
+    <div class="build-filter-bar">
+      <select id="build-filter-select">
+        <option value="">All tracked gear</option>
+        ${opts}
+      </select>
+    </div>
+  `;
+}
+
+
+// ─── BUILDS TAB ───────────────────────────────────────────────────────────────
+
+function renderBuildsTab(el) {
+  let html = UI.editingBuild ? renderBuildEditor() : renderBuildList();
+  if (UI.buildPicker) html += renderBuildPicker();
+  el.innerHTML = html;
+}
+
+function renderBuildList() {
+  const builds = AppState.builds;
+  return `
+    <div class="tab-header">
+      <h2>Builds</h2>
+      <button class="new-build-btn" data-action="build-new">+ New</button>
+    </div>
+    ${builds.length === 0
+      ? '<p class="empty-msg">No builds yet.<br>Tap <strong>+ New</strong> to create your first loadout.</p>'
+      : `<div class="build-list">${builds.map(renderBuildCard).join('')}</div>`
+    }
+  `;
+}
+
+function renderBuildCard(build) {
+  const isActive  = AppState.activeBuildId === build.id;
+  const SLOT_KEYS = ['weapon','head','chest','arms','waist','legs'];
+
+  const chips = SLOT_KEYS.map(sk => {
+    const slot = build.slots[sk];
+    if (!slot?.equipId) {
+      const label = sk === 'weapon' ? '?' : ARMOR_SLOT_NAMES[sk].substring(0,3);
+      return `<span class="slot-chip slot-chip-empty" title="${sk}">${label}</span>`;
+    }
+    const isWep    = sk === 'weapon';
+    const equip    = isWep ? WEAPON_BY_ID[slot.equipId] : ARMOR_BY_ID[slot.equipId];
+    const monster  = equip ? MONSTER_BY_ID[equip.monsterId] : null;
+    const done     = AppState.getProgress(slot.equipId).currentGrade >= slot.targetGrade;
+    const label    = isWep ? (WEAPON_TYPES[equip?.type]?.short || '?') : ARMOR_SLOT_NAMES[sk].substring(0,3);
+    return `<span class="slot-chip${done ? ' slot-chip-done' : ''}"
+      style="${monster ? `border-color:${monster.color}` : ''}"
+      title="${equip?.name || sk}">${label}</span>`;
+  }).join('');
+
+  const filled    = SLOT_KEYS.filter(sk => build.slots[sk]?.equipId);
+  const done      = filled.filter(sk => AppState.getProgress(build.slots[sk].equipId).currentGrade >= build.slots[sk].targetGrade);
+  const pct       = filled.length ? Math.round(done.length / filled.length * 100) : 0;
+
+  return `
+    <div class="build-card${isActive ? ' build-card-active' : ''}">
+      <div class="build-card-header">
+        <div class="build-card-title">
+          <span class="build-name">${build.name}</span>
+          ${isActive ? '<span class="build-active-badge">Active</span>' : ''}
+        </div>
+        <div class="build-card-actions">
+          <button class="build-btn${isActive ? ' build-btn-active' : ''}" data-action="build-activate" data-id="${build.id}">
+            ${isActive ? 'Deactivate' : 'Set Active'}
+          </button>
+          <button class="build-btn" data-action="build-edit" data-id="${build.id}">Edit</button>
+          <button class="build-btn build-btn-danger" data-action="build-delete" data-id="${build.id}">✕</button>
+        </div>
+      </div>
+      <div class="build-slots-chips">${chips}</div>
+      <div class="build-progress-line">
+        <span class="build-progress-label">${done.length}/${filled.length} slots complete</span>
+        ${filled.length > 0 ? `
+          <div class="build-progress-bar">
+            <div class="build-progress-fill" style="width:${pct}%"></div>
+          </div>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderBuildEditor() {
+  const build = UI.editingBuild;
+  const SLOT_KEYS  = ['weapon','head','chest','arms','waist','legs'];
+  const SLOT_LABEL = { weapon:'Weapon', head:'Head', chest:'Chest', arms:'Arms', waist:'Waist', legs:'Legs' };
+  return `
+    <div class="tab-header">
+      <h2>${build.isNew ? 'New Build' : 'Edit Build'}</h2>
+    </div>
+    <div class="build-editor">
+      <div class="build-name-row">
+        <input type="text" id="build-name-input" class="build-name-input"
+          value="${build.name}" placeholder="Build name" />
+      </div>
+      <div class="build-slot-list">
+        ${SLOT_KEYS.map(sk => renderBuildSlotCard(sk, SLOT_LABEL[sk], build.slots[sk])).join('')}
+      </div>
+      <div class="build-editor-footer">
+        <button class="build-save-btn" data-action="build-save">Save Build</button>
+        <button class="build-cancel-btn" data-action="build-cancel">Cancel</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderBuildSlotCard(slotKey, label, slot) {
+  if (!slot?.equipId) {
+    return `
+      <div class="build-slot-card">
+        <div class="build-slot-label">${label}</div>
+        <button class="build-slot-empty" data-action="build-slot-tap" data-id="${slotKey}">
+          Tap to pick…
+        </button>
+      </div>`;
+  }
+  const isWep   = slotKey === 'weapon';
+  const equip   = isWep ? WEAPON_BY_ID[slot.equipId] : ARMOR_BY_ID[slot.equipId];
+  const monster = equip ? MONSTER_BY_ID[equip.monsterId] : null;
+  if (!equip || !monster) {
+    return `<div class="build-slot-card"><div class="build-slot-label">${label}</div>
+      <button class="build-slot-empty" data-action="build-slot-tap" data-id="${slotKey}">Tap to pick…</button></div>`;
+  }
+  const current = AppState.getProgress(slot.equipId).currentGrade;
+  const done    = current >= slot.targetGrade;
+  return `
+    <div class="build-slot-card build-slot-filled-card">
+      <div class="build-slot-label">${label}</div>
+      <div class="build-slot-content">
+        <div class="build-slot-piece-info" style="border-left:3px solid ${monster.color}">
+          <span class="build-slot-piece-name">${equip.name}</span>
+          <span class="build-slot-monster" style="color:${monster.color}">${monster.name}</span>
+        </div>
+        <div class="grade-row build-slot-grade-row">
+          <label>Target</label>
+          <button class="grade-btn" data-action="build-slot-target-dec" data-id="${slotKey}">−</button>
+          <span class="grade-val">${stepLabel(monster, slot.targetGrade)}</span>
+          <button class="grade-btn" data-action="build-slot-target-inc" data-id="${slotKey}">+</button>
+          ${done
+            ? '<span class="done-pill">✓</span>'
+            : gradeBar(current, slot.targetGrade, monster)}
+        </div>
+        <div class="build-slot-row-btns">
+          <button class="build-slot-change-btn" data-action="build-slot-tap" data-id="${slotKey}">Change</button>
+          <button class="build-slot-clear-btn" data-action="build-slot-clear" data-id="${slotKey}">Clear</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderBuildPicker() {
+  const { slotKey, step, monsterId } = UI.buildPicker;
+  const SLOT_LABEL = { weapon:'Weapon', head:'Head', chest:'Chest', arms:'Arms', waist:'Waist', legs:'Legs' };
+  const isWep = slotKey === 'weapon';
+  let content = '';
+
+  if (step === 'type' && monsterId) {
+    const monster   = MONSTER_BY_ID[monsterId];
+    const available = WEAPONS.filter(w => w.monsterId === monsterId);
+    content = `
+      <p class="picker-subtitle">Pick type for
+        <strong style="color:${monster.color}">${monster.name}</strong>:
+      </p>
+      <div class="picker-type-grid">
+        ${available.map(w => `
+          <button class="picker-type-btn" data-action="build-picker-type" data-id="${w.type}">
+            ${WEAPON_TYPES[w.type].short}
+          </button>`).join('')}
+      </div>
+      <button class="picker-back-btn" data-action="build-picker-back">← Different monster</button>`;
+  } else {
+    const monsters = isWep
+      ? MONSTERS.filter(m => WEAPONS.some(w => w.monsterId === m.id))
+      : MONSTERS.filter(m => ARMOR.some(a => a.monsterId === m.id && a.slot === slotKey));
+    content = `
+      <div class="picker-monster-list">
+        ${monsters.map(m => `
+          <button class="picker-monster-row" data-action="build-picker-monster" data-id="${m.id}">
+            <div class="picker-pip" style="background:${m.color}"></div>
+            <span class="picker-monster-name">${m.name}</span>
+            <span class="picker-monster-stars" style="color:${m.color}">${starStr(m.stars)}</span>
+            ${elemBadge(m.element)}
+            ${m.isEvent ? '<span class="event-badge">EVENT</span>' : ''}
+          </button>`).join('')}
+      </div>`;
+  }
+
+  return `
+    <div class="picker-overlay">
+      <div class="picker-header">
+        <span>Pick ${SLOT_LABEL[slotKey]}</span>
+        <button class="picker-close-btn" data-action="build-picker-cancel">✕</button>
+      </div>
+      ${content}
+    </div>`;
 }

@@ -1,4 +1,4 @@
-const CACHE = 'mhnow-v2';
+const CACHE = 'mhnow-v3';
 const ASSETS = [
   './',
   './index.html',

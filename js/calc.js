@@ -3265,3 +3265,61 @@ function calcMonsterPriority() {
 
   return Object.values(scores).sort((a, b) => b.score - a.score);
 }
+
+// ─── Build-scoped calculations ────────────────────────────────────────────────
+
+const BUILD_SLOT_KEYS = ['weapon', 'head', 'chest', 'arms', 'waist', 'legs'];
+
+function calcBuildNeeds(build) {
+  const byMat = {};
+  for (const slotKey of BUILD_SLOT_KEYS) {
+    const slot     = build.slots[slotKey];
+    if (!slot?.equipId) continue;
+    const isWeapon = slotKey === 'weapon';
+    const equip    = isWeapon ? WEAPON_BY_ID[slot.equipId] : ARMOR_BY_ID[slot.equipId];
+    if (!equip) continue;
+    const monster  = MONSTER_BY_ID[equip.monsterId];
+    if (!monster) continue;
+    const current  = AppState.getProgress(slot.equipId).currentGrade;
+    if (slot.targetGrade <= current) continue;
+    const cost     = calcUpgradeCost(monster, current, slot.targetGrade, isWeapon);
+    for (const item of cost.materials) {
+      const key = `${monster.id}__${item.matId}`;
+      if (!byMat[key]) byMat[key] = { monster, matId: item.matId, name: item.name, rarity: item.rarity, needed: 0 };
+      byMat[key].needed += item.qty;
+    }
+  }
+  return Object.values(byMat)
+    .map(e => ({ ...e, have: AppState.getInventory(e.matId), shortage: Math.max(0, e.needed - AppState.getInventory(e.matId)) }))
+    .sort((a, b) => b.monster.stars - a.monster.stars || b.rarity - a.rarity || a.name.localeCompare(b.name));
+}
+
+function calcBuildPriority(build) {
+  const scores = {};
+  for (const slotKey of BUILD_SLOT_KEYS) {
+    const slot     = build.slots[slotKey];
+    if (!slot?.equipId) continue;
+    const isWeapon = slotKey === 'weapon';
+    const equip    = isWeapon ? WEAPON_BY_ID[slot.equipId] : ARMOR_BY_ID[slot.equipId];
+    if (!equip) continue;
+    const monster  = MONSTER_BY_ID[equip.monsterId];
+    if (!monster) continue;
+    const current  = AppState.getProgress(slot.equipId).currentGrade;
+    const stepsLeft = Math.max(0, slot.targetGrade - current);
+    if (!stepsLeft) continue;
+    const cost       = calcUpgradeCost(monster, current, slot.targetGrade, isWeapon);
+    const totalQty   = cost.materials.reduce((s, m) => s + m.qty, 0) || 1;
+    const avgRarity  = cost.materials.reduce((s, m) => s + m.rarity * m.qty, 0) / totalQty;
+    const rarityMult = 1 + avgRarity / 10;
+    const need       = cost.materials.reduce((s, m) => s + m.qty, 0);
+    const short      = cost.materials.reduce((s, m) => s + Math.max(0, m.qty - AppState.getInventory(m.matId)), 0);
+    const shortageRatio = need ? short / need : 1;
+    let pieceScore = stepsLeft * rarityMult * shortageRatio;
+    if (monster.isEvent) pieceScore *= 2;
+    if (!scores[monster.id]) scores[monster.id] = { monster, score: 0, pieces: 0, stepsTotal: 0 };
+    scores[monster.id].score      += pieceScore;
+    scores[monster.id].pieces     += 1;
+    scores[monster.id].stepsTotal += stepsLeft;
+  }
+  return Object.values(scores).sort((a, b) => b.score - a.score);
+}
